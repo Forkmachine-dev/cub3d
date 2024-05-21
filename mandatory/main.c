@@ -31,7 +31,7 @@ void fake_map(t_cub3d *cub)
     cub->map.addr[0] = "11111111111111111111";
     cub->map.addr[1] = "10000000000000000001";
     cub->map.addr[2] = "10011111000001100001";
-    cub->map.addr[3] = "10000000000001111101";
+    cub->map.addr[3] = "10000000000001011101";
     cub->map.addr[4] = "11111111000000000001";
     cub->map.addr[5] = "10000000000000000001";
     cub->map.addr[6] = "10000000000000000001";
@@ -46,9 +46,9 @@ void fake_map(t_cub3d *cub)
         {
             if (cub->map.addr[y][x] == 'N')
             {
-                cub->camera.pos.x = x;
-                cub->camera.pos.y = y;
-                cub->camera.dir = degree_to_radian(270);
+                cub->camera.pos.x = x * TILE_SIZE + TILE_SIZE / 2;
+                cub->camera.pos.y = y * TILE_SIZE + TILE_SIZE / 2;
+                cub->camera.dir = degree_to_radian(0);
                 cub->camera.fov = 60;
                 return;
             }

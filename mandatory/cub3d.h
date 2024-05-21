@@ -12,6 +12,8 @@
 #define HEIGHT 1080
 
 
+#define TILE_SIZE 64
+#define ZOOM 1
 
 typedef struct s_vector
 {
@@ -38,9 +40,7 @@ typedef struct s_cub3d
     mlx_t    *mlx;
     mlx_image_t    *image;
     char    *title;
-    int    zoom;
     t_camera camera;
-    int should_terminate;
     t_map map;
 }               t_cub3d;
 
@@ -60,5 +60,7 @@ void draw_square(t_cub3d *cub, t_vec2 pos, int size, int color);
 void draw_circle(t_cub3d *cub, t_vec2 pos, int radius, int color);
 double	degree_to_radian(double angle_degrees);
 void  ft_key_hooks(void *param);
+int ray_cast(t_cub3d *cub, t_map *map, double angle, bool debug, int color, int current_ray);
+bool is_solid_tile(t_vec2 inter, t_map *map);
 
 #endif
