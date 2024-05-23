@@ -13,7 +13,7 @@ SRC_B = $(addprefix $(BON_FOLDER), $(SRC_COMMON))
 OBJ_M = $(SRC_M:.c=.o)
 OBJ_B = $(SRC_B:.c=.o)
 
-CFLAGS = -Wall -Wextra -Werror -ffast-math  -fsanitize=address -g
+CFLAGS = -Wall -Wextra -Werror -ffast-math   # -fsanitize=address -g
 
 all : $(NAME)
 

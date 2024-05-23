@@ -99,7 +99,7 @@ void draw_bg(t_cub3d *cub)
 void render_loop_handle (void *param)
 {
     t_cub3d *cub = (t_cub3d *)param;
-    ft_clear_image(cub->image);
+    //ft_clear_image(cub->image);
     //draw_from_above(cub);
 
     draw_bg(cub);
@@ -122,5 +122,5 @@ void render_loop_handle (void *param)
             angle -= 2 * M_PI;
     }
    
-   //draw_player(cub);
+  //draw_player(cub);
 }

@@ -5,8 +5,8 @@ bool is_solid_tile(t_vec2 inter, t_map *map)
     int x = inter.x / TILE_SIZE;
     int y = inter.y / TILE_SIZE;
 
-    if (x < 0 || y < 0 || x >= map->width || y >= map->height)
-        return false;
+    if (x <= 0 || y <= 0 || x >= map->width - 1 || y >= map->height - 1)
+        return true;
     if (map->addr[y][x] == '1')
         return true;
     return false;
@@ -29,17 +29,19 @@ t_vec2 solve_h_intersections(t_camera *camera, t_map *map, double dir)
 
     float atan = -1 / tan(dir);
     float xo, yo;
-    float dof = 0;
+   
+   // float dof = 0;
     
-
+    bool dir_up = false;
     if(dir > M_PI) // looking up
     {
-        inter.y = ((int)camera->pos.y / TILE_SIZE) * TILE_SIZE - 0.0001;
+        inter.y = ((int)camera->pos.y / TILE_SIZE) * TILE_SIZE;
         inter.x = camera->pos.x + (camera->pos.y - inter.y) * atan;
         yo = -TILE_SIZE;
         xo = -yo * atan;
+        dir_up = true;
     }
-    else if(dir < M_PI) // looking down
+    else
     {
         inter.y = ((int)camera->pos.y / TILE_SIZE) * TILE_SIZE + TILE_SIZE;
         inter.x = camera->pos.x + (camera->pos.y - inter.y) * atan;
@@ -48,13 +50,16 @@ t_vec2 solve_h_intersections(t_camera *camera, t_map *map, double dir)
     }
 
 
-    while (dof < 100)
+    while (true)
     {
-        if (is_solid_tile(inter, map))
+        t_vec2 point = {inter.x, inter.y};
+        if(dir_up)
+            point.y -= 1;
+        if (is_solid_tile(point, map))
             break;
         inter.x += xo;
         inter.y += yo;
-        dof += 1;
+        //dof += 1;
     }
 
     return inter;
@@ -66,16 +71,17 @@ t_vec2 solve_v_intersections(t_camera *camera, t_map *map, double dir)
 
     float natan = -tan(dir);
     float xo, yo;
-    float dof = 0;
-
+    //float dof = 0;
+    bool dir_left = false;
     if (dir > M_PI_2 && dir < 3 * M_PI_2) // looking left
     {
-        inter.x = ((int)camera->pos.x / TILE_SIZE) * TILE_SIZE - 0.0001;
+        inter.x = ((int)camera->pos.x / TILE_SIZE) * TILE_SIZE;
         inter.y = camera->pos.y + (camera->pos.x - inter.x) * natan;
         xo = -TILE_SIZE;
         yo = -xo * natan;
+        dir_left = true;
     }
-    else if (dir < M_PI_2 || dir > 3 * M_PI_2) // looking right
+    else // looking right
     {
         inter.x = ((int)camera->pos.x / TILE_SIZE) * TILE_SIZE + TILE_SIZE;
         inter.y = camera->pos.y + (camera->pos.x - inter.x) * natan;
@@ -83,14 +89,16 @@ t_vec2 solve_v_intersections(t_camera *camera, t_map *map, double dir)
         yo = -xo * natan;
     }
     
-
-    while (dof < 100)
+    while (true)
     {
-        if (is_solid_tile(inter, map))
+        t_vec2 point = {inter.x, inter.y};
+        if(dir_left)
+            point.x -= 1;
+        if (is_solid_tile(point, map))
             break;
         inter.x += xo;
         inter.y += yo;
-        dof += 1;
+        //dof += 1;
     }
 
     return inter;
@@ -105,7 +113,8 @@ void render_wall(t_cub3d *cub, double dist, double ray_angle, bool is_vertical, 
     if(angle > 2 * M_PI)
         angle -= 2 * M_PI;
     dist = dist * cos(angle);
-    double wall_height = (cub->map.height * HEIGHT) / (dist / 3);
+    float distance_projection_plane = (WIDTH / 2) / tan(degree_to_radian(cub->camera.fov) / 2);
+    double wall_height = (TILE_SIZE / dist)  *  distance_projection_plane;
     // we need to take into account the TILE_SIZE
     if(wall_height > HEIGHT)
         wall_height = HEIGHT;
@@ -122,6 +131,11 @@ void render_wall(t_cub3d *cub, double dist, double ray_angle, bool is_vertical, 
 
 int ray_cast(t_cub3d *cub, t_map *map, double angle, bool debug, int color, int current_ray)
 {
+
+    if(angle < 0)
+        angle += 2 * M_PI;
+    if(angle > 2 * M_PI)
+        angle -= 2 * M_PI;
     // vertical intersection
     t_vec2 h_inter = solve_h_intersections(&cub->camera, map, angle);
     t_vec2 v_inter = solve_v_intersections(&cub->camera, map, angle);

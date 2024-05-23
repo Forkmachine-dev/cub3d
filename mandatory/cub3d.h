@@ -15,6 +15,19 @@
 #define TILE_SIZE 64
 #define ZOOM 1
 
+
+typedef struct s_ray
+{
+    float hit_x;
+    float hit_y;
+    float distance;
+    float angle;
+    bool is_vertical;
+    bool is_up;
+    bool is_right;
+
+}              t_ray;
+
 typedef struct s_vector
 {
     float x;
