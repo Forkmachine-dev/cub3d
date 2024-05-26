@@ -13,20 +13,9 @@
 
 
 #define TILE_SIZE 64
-#define ZOOM 1
+#define MAX_DOORS 40
 
 
-typedef struct s_ray
-{
-    float hit_x;
-    float hit_y;
-    float distance;
-    float angle;
-    bool is_vertical;
-    bool is_up;
-    bool is_right;
-
-}              t_ray;
 
 typedef struct s_vector
 {
@@ -41,6 +30,14 @@ typedef struct s_map
     int height;
 }               t_map;
 
+typedef struct s_direction
+{
+    bool up;
+    bool left;
+    bool down;
+    bool right;
+}              t_direction;
+
 typedef struct s_camera
 {
     t_vec2  pos;
@@ -48,13 +45,32 @@ typedef struct s_camera
     int     fov;
 }               t_camera;
 
+typedef struct s_door_info
+{
+    int map_x;
+    int map_y;
+    float close_factor;
+    bool is_vertical;
+    bool is_opening;
+}              t_door_info;
+
 typedef struct s_cub3d
 {
     mlx_t    *mlx;
     mlx_image_t    *image;
     char    *title;
     t_camera camera;
+    t_door_info door_infos[MAX_DOORS];
     t_map map;
+    bool display_debug;
+    double minimap_scale;
+    mlx_texture_t *north_texture;
+    mlx_texture_t *south_texture;
+    mlx_texture_t *west_texture;
+    mlx_texture_t *east_texture;
+    mlx_texture_t *door_texture;
+    bool is_current_ray_door;
+    int current_ray_door_index;
 }               t_cub3d;
 
 int init_cub3d(t_cub3d *cub);
@@ -73,7 +89,7 @@ void draw_square(t_cub3d *cub, t_vec2 pos, int size, int color);
 void draw_circle(t_cub3d *cub, t_vec2 pos, int radius, int color);
 double	degree_to_radian(double angle_degrees);
 void  ft_key_hooks(void *param);
-int ray_cast(t_cub3d *cub, t_map *map, double angle, bool debug, int color, int current_ray);
-bool is_solid_tile(t_vec2 inter, t_map *map);
+int ray_cast(t_cub3d *cub, t_map *map, double angle, int color, int current_ray);
+int32_t    get_color_texture(mlx_texture_t *txt, int x, int y);
 
 #endif

@@ -10,19 +10,20 @@ void draw_from_above(t_cub3d *cub)
     int y = 0;
     int gap = 1;
 
+    double scale = cub->minimap_scale;
     while (y < map_height)
     {
         x = 0;
         while (x < map_width)
         {
             if (cub->map.addr[y][x] == '1')
-                draw_square(cub, (t_vec2){((x * TILE_SIZE) + gap) * ZOOM,
-                 ((y * TILE_SIZE) + gap) * ZOOM}, 
-                 (TILE_SIZE - gap * 2) * ZOOM, 0xFFFFFF80);
+                draw_square(cub, (t_vec2){((x * TILE_SIZE) + gap) * scale,
+                 ((y * TILE_SIZE) + gap) * scale}, 
+                 (TILE_SIZE - gap * 2) * scale, 0xFFFFFF80);
             else
-                draw_square(cub, (t_vec2){((x * TILE_SIZE) + gap) * ZOOM,
-                 ((y * TILE_SIZE) + gap) * ZOOM}, 
-                 (TILE_SIZE - gap * 2) * ZOOM, 0x00000080);
+                draw_square(cub, (t_vec2){((x * TILE_SIZE) + gap) * scale,
+                 ((y * TILE_SIZE) + gap) * scale}, 
+                 (TILE_SIZE - gap * 2) * scale, 0x00000080);
             x++;
         }
         y++;
@@ -33,43 +34,14 @@ void draw_from_above(t_cub3d *cub)
 
 void draw_player(t_cub3d *cub)
 {
-    draw_circle(cub, (t_vec2){cub->camera.pos.x * ZOOM, cub->camera.pos.y * ZOOM}, 7, 0xFF000080);
-   // draw the direction of the player
-    t_vec2 collison_point_f = {cub->camera.pos.x + cos(cub->camera.dir) * 20, cub->camera.pos.y + sin(cub->camera.dir) * 20};
-    t_vec2 collison_point_b = {cub->camera.pos.x - cos(cub->camera.dir) * 20, cub->camera.pos.y - sin(cub->camera.dir) * 20};
-    t_vec2 collison_point_l = {cub->camera.pos.x + cos(cub->camera.dir - M_PI_2) * 20, cub->camera.pos.y + sin(cub->camera.dir - M_PI_2) * 20};
-    t_vec2 collison_point_r = {cub->camera.pos.x + cos(cub->camera.dir + M_PI_2) * 20, cub->camera.pos.y + sin(cub->camera.dir + M_PI_2) * 20};
-
-    t_vec2 dir_f = {collison_point_f.x * ZOOM, collison_point_f.y * ZOOM};
-    t_vec2 dir_b = {collison_point_b.x * ZOOM, collison_point_b.y * ZOOM};
-    t_vec2 dir_l = {collison_point_l.x * ZOOM, collison_point_l.y * ZOOM};
-    t_vec2 dir_r = {collison_point_r.x * ZOOM, collison_point_r.y * ZOOM};
-
-
-    if(is_solid_tile(collison_point_f, &cub->map) == true)
-        ft_draw_line(cub, &(t_vec2){cub->camera.pos.x * ZOOM , cub->camera.pos.y * ZOOM}, &dir_f, 0x00FF0080);
-    else 
-        ft_draw_line(cub, &(t_vec2){cub->camera.pos.x * ZOOM , cub->camera.pos.y * ZOOM}, &dir_f, 0x0000FF80);
-    
-    if(is_solid_tile(collison_point_b, &cub->map) == true)
-        ft_draw_line(cub, &(t_vec2){cub->camera.pos.x * ZOOM , cub->camera.pos.y * ZOOM}, &dir_b, 0x00FF0080);
-    else 
-        ft_draw_line(cub, &(t_vec2){cub->camera.pos.x * ZOOM , cub->camera.pos.y * ZOOM}, &dir_b, 0x0000FF80);
-
-    if(is_solid_tile(collison_point_l, &cub->map) == true)
-        ft_draw_line(cub, &(t_vec2){cub->camera.pos.x * ZOOM , cub->camera.pos.y * ZOOM}, &dir_l, 0x00FF0080);
-    else 
-        ft_draw_line(cub, &(t_vec2){cub->camera.pos.x * ZOOM , cub->camera.pos.y * ZOOM}, &dir_l, 0x0000FF80);
-
-    if(is_solid_tile(collison_point_r, &cub->map) == true)
-        ft_draw_line(cub, &(t_vec2){cub->camera.pos.x * ZOOM , cub->camera.pos.y * ZOOM}, &dir_r, 0x00FF0080);
-    else 
-        ft_draw_line(cub, &(t_vec2){cub->camera.pos.x * ZOOM , cub->camera.pos.y * ZOOM}, &dir_r, 0x0000FF80);
+    double scale = cub->minimap_scale;
+    draw_circle(cub, (t_vec2){cub->camera.pos.x * scale, cub->camera.pos.y * scale}, 7, 0xFF000080);
 }
+
 void draw_bg(t_cub3d *cub)
 {
-    int floor_color = 0x808000FF;
-    int sky = 0xeeeee4;
+    int floor_color = 0x404000FF;
+    int sky = 0xF0F0FFff;
 
     int x = 0;
     int y = 0;
@@ -96,13 +68,45 @@ void draw_bg(t_cub3d *cub)
     }
 }
 
+
+void doors_update(t_cub3d *cub)
+{
+    int i = 0;
+    while (i < MAX_DOORS)
+    {
+        if (cub->door_infos[i].map_x == -1)
+            break;
+        if (cub->door_infos[i].is_opening)
+        {
+            cub->door_infos[i].close_factor -= 0.01;
+            if (cub->door_infos[i].close_factor <= 0)
+            {
+                cub->door_infos[i].close_factor = 0;
+            }
+        }
+        else
+        {
+            cub->door_infos[i].close_factor += 0.01;
+            if (cub->door_infos[i].close_factor >= 1)
+            {
+                cub->door_infos[i].close_factor = 1;
+            }
+        }
+        i++;
+    }
+}
+
 void render_loop_handle (void *param)
 {
     t_cub3d *cub = (t_cub3d *)param;
-    //ft_clear_image(cub->image);
-    //draw_from_above(cub);
-
-    draw_bg(cub);
+    if(cub->display_debug == false)
+        draw_bg(cub);
+    else 
+    {
+        ft_clear_image(cub->image);
+        draw_from_above(cub);
+    }
+    doors_update(cub);
     double angle = cub->camera.dir - degree_to_radian(cub->camera.fov / 2);
     double step = degree_to_radian(cub->camera.fov) / WIDTH;
     if(angle < 0)
@@ -112,7 +116,8 @@ void render_loop_handle (void *param)
     int rays = 0;
     while (rays < WIDTH)
     {
-        ray_cast(cub, &cub->map, angle, true, 0xFF0000ff, rays);
+
+        ray_cast(cub, &cub->map, angle, 0xFF0000ff, rays);
         angle += step;
         rays++;
 
@@ -122,5 +127,6 @@ void render_loop_handle (void *param)
             angle -= 2 * M_PI;
     }
    
-  //draw_player(cub);
+  if(cub->display_debug == true)
+    draw_player(cub);
 }

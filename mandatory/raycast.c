@@ -1,166 +1,299 @@
 #include "cub3d.h"
 
-bool is_solid_tile(t_vec2 inter, t_map *map)
+bool is_solid_tile(t_vec2 inter, t_vec2 *origin,  t_map *map, t_cub3d* cub, bool vetical_check, float ray_angle, float xo, float yo)
 {
     int x = inter.x / TILE_SIZE;
     int y = inter.y / TILE_SIZE;
 
+    (void)ray_angle;
+
+    t_vec2 pushed_inter = {inter.x + (xo / 2), inter.y + (yo / 2)};
+
     if (x <= 0 || y <= 0 || x >= map->width - 1 || y >= map->height - 1)
         return true;
-    if (map->addr[y][x] == '1')
+    if (map->addr[y][x] == '1' || map->addr[y][x] == 'V' || map->addr[y][x] == 'H')
+    {
+        if (map->addr[y][x] == 'V' || map->addr[y][x] == 'H') //NOTE : remove this for loop, use while
+        {
+            for (int i = 0; i < MAX_DOORS; i++)
+            {
+                if (cub->door_infos[i].map_x == x && cub->door_infos[i].map_y == y)
+                {
+                    if((vetical_check && !cub->door_infos[i].is_vertical) || (!vetical_check && cub->door_infos[i].is_vertical))
+                        return false;
+                    {
+                        if(cub->door_infos[i].is_vertical)
+                        {
+                            float x_factor = pushed_inter.y - ((int)(pushed_inter.y / TILE_SIZE) * TILE_SIZE);
+                            x_factor = (TILE_SIZE - x_factor) / TILE_SIZE;
+                            if(x_factor > 1)
+                                x_factor = 1;
+                            if(x_factor > cub->door_infos[i].close_factor)
+                                    return false;
+                            *origin = pushed_inter;
+                        }
+                        else
+                        {
+                            float y_factor = pushed_inter.x - ((int)(pushed_inter.x / TILE_SIZE) * TILE_SIZE);
+                            y_factor = y_factor / TILE_SIZE;
+                            if(y_factor > cub->door_infos[i].close_factor)
+                                    return false;  
+                            *origin = pushed_inter;                     
+                        }
+                        cub->is_current_ray_door = true;
+                        cub->current_ray_door_index = i;
+                        break;
+                    }
+                }
+            }
+        }
         return true;
+    }
     return false;
 }
 
-int point_inside_fov(float camera_angle, float fov, t_vec2 camera, t_vec2 point) {
-    float angle_to_point = atan2f(point.y - camera.y, point.x - camera.x) * 180.0 / M_PI;
-    float angle_difference = fabsf(angle_to_point - camera_angle);
-    
-    // Ensure the angle is within [0, 360] degrees
-    angle_difference = fminf(angle_difference, 360.0f - angle_difference);
-    
-    // Check if the angle to the point is within the FOV angle range
-    return angle_difference <= fov / 2.0f;
-}
-
-t_vec2 solve_h_intersections(t_camera *camera, t_map *map, double dir)
+t_vec2 solve_h_intersections(t_cub3d *cub, t_map *map, double angle, t_direction direction)
 {
     t_vec2 inter;
-
-    float atan = -1 / tan(dir);
-    float xo, yo;
+    float xo;
+    float yo;
    
-   // float dof = 0;
-    
-    bool dir_up = false;
-    if(dir > M_PI) // looking up
+   inter.y = floor(cub->camera.pos.y / TILE_SIZE) * TILE_SIZE;
+   if(direction.down)
+     inter.y += TILE_SIZE;
+    inter.x = cub->camera.pos.x + (inter.y - cub->camera.pos.y) / tan(angle);
+    yo = TILE_SIZE;
+    if(direction.up)
+      yo *= -1;
+    xo = TILE_SIZE / tan(angle);
+    if((direction.left && xo > 0) || (direction.right && xo < 0))
+      xo *= -1;
+    while (true)
     {
-        inter.y = ((int)camera->pos.y / TILE_SIZE) * TILE_SIZE;
-        inter.x = camera->pos.x + (camera->pos.y - inter.y) * atan;
-        yo = -TILE_SIZE;
-        xo = -yo * atan;
-        dir_up = true;
+        t_vec2 point = {inter.x, inter.y};
+        if(direction.up)
+            point.y -= 1;
+        if (is_solid_tile(point, &inter, map, cub, false, angle, xo, yo))
+            break;
+        inter.x += xo;
+        inter.y += yo;
+    }
+    return inter;
+}
+
+t_vec2 solve_v_intersections(t_cub3d *cub, t_map *map, double dir, t_direction direction)
+{
+    t_vec2 inter;
+    float xo;
+    float yo; 
+
+    inter.x = floor(cub->camera.pos.x / TILE_SIZE) * TILE_SIZE;
+    if (direction.right)
+        inter.x += TILE_SIZE;
+    inter.y = cub->camera.pos.y + (inter.x - cub->camera.pos.x) * tan(dir);
+    xo = TILE_SIZE;
+    if (direction.left)
+        xo *= -1;
+    yo = TILE_SIZE * tan(dir);
+    if ((direction.up && yo > 0) || (direction.down && yo < 0))
+        yo *= -1;
+    while (true)
+    {
+        t_vec2 point = {inter.x, inter.y};
+        if (direction.left)
+            point.x -= 1;
+        if (is_solid_tile(point, &inter, map, cub, true, dir, xo, yo))
+            break;
+        inter.x += xo;
+        inter.y += yo;
+    }
+    return inter;
+}
+
+
+void render_wall(t_cub3d *cub, double dist, double ray_angle, bool is_vertical, int current_ray, float hitX, float hitY)
+{
+    dist = dist * cos(ray_angle - cub->camera.dir);
+    float distance_projection_plane = (WIDTH / 2) / tanf(degree_to_radian(cub->camera.fov / 2));
+    double wall_height = (TILE_SIZE / dist)  *  distance_projection_plane;
+
+
+  
+   
+    int wall_start_top_y = (HEIGHT /2 ) - ((int)wall_height / 2);
+    int wall_start_top_x = current_ray;;
+
+    float x_factor = 0;
+    float tex_x = 0;
+
+    mlx_texture_t *texture = NULL;
+
+    if (is_vertical)
+    {
+        //if down
+        x_factor = hitY - ((int)(hitY / TILE_SIZE) * TILE_SIZE);
+        if (cos(ray_angle) >= 0)
+        {
+ 
+            texture = cub->east_texture;
+            tex_x = (cub->east_texture->width * x_factor) / TILE_SIZE;
+
+        }
+        else 
+        {
+            x_factor = (cub->west_texture->width * x_factor) / TILE_SIZE;
+            tex_x = cub->west_texture->width - x_factor;
+            texture = cub->west_texture;
+            
+        }
+
+      
     }
     else
     {
-        inter.y = ((int)camera->pos.y / TILE_SIZE) * TILE_SIZE + TILE_SIZE;
-        inter.x = camera->pos.x + (camera->pos.y - inter.y) * atan;
-        yo = TILE_SIZE;
-        xo = -yo * atan;
+        x_factor = hitX - ((int)(hitX / TILE_SIZE) * TILE_SIZE);
+        if(sin(ray_angle) < 0)
+        {
+  
+            texture = cub->north_texture;
+            tex_x = (cub->north_texture->width * x_factor) / TILE_SIZE;
+            
+        }
+        else 
+        {
+ 
+            x_factor = (cub->south_texture->width * x_factor) / TILE_SIZE;
+            tex_x = cub->south_texture->width - x_factor;
+            texture = cub->south_texture;
+            
+        }
+
+
     }
 
 
-    while (true)
+
+    float tex_y_off = 0;   
+    float tex_y_step = (float)texture->height / wall_height;;
+     float tex_y = tex_y_off * tex_y_step;
+
+
+   
+    int current_y = wall_start_top_y;
+    if(current_y < 0)
     {
-        t_vec2 point = {inter.x, inter.y};
-        if(dir_up)
-            point.y -= 1;
-        if (is_solid_tile(point, map))
-            break;
-        inter.x += xo;
-        inter.y += yo;
-        //dof += 1;
+        current_y = 0;
+        tex_y = abs(wall_start_top_y) * tex_y_step;
     }
 
-    return inter;
-}
-
-t_vec2 solve_v_intersections(t_camera *camera, t_map *map, double dir)
-{
-    t_vec2 inter;
-
-    float natan = -tan(dir);
-    float xo, yo;
-    //float dof = 0;
-    bool dir_left = false;
-    if (dir > M_PI_2 && dir < 3 * M_PI_2) // looking left
-    {
-        inter.x = ((int)camera->pos.x / TILE_SIZE) * TILE_SIZE;
-        inter.y = camera->pos.y + (camera->pos.x - inter.x) * natan;
-        xo = -TILE_SIZE;
-        yo = -xo * natan;
-        dir_left = true;
-    }
-    else // looking right
-    {
-        inter.x = ((int)camera->pos.x / TILE_SIZE) * TILE_SIZE + TILE_SIZE;
-        inter.y = camera->pos.y + (camera->pos.x - inter.x) * natan;
-        xo = TILE_SIZE;
-        yo = -xo * natan;
-    }
     
-    while (true)
+
+   
+   // shade_value = 1;
+
+    while (current_y < HEIGHT && current_y < wall_start_top_y + wall_height)
     {
-        t_vec2 point = {inter.x, inter.y};
-        if(dir_left)
-            point.x -= 1;
-        if (is_solid_tile(point, map))
-            break;
-        inter.x += xo;
-        inter.y += yo;
-        //dof += 1;
+        int tex_color = get_color_texture(texture, tex_x, tex_y);
+        ft_pixel_put(cub->image, wall_start_top_x, current_y, tex_color);
+        tex_y += tex_y_step;
+        current_y++;
     }
 
-    return inter;
+
+
+    if(cub->is_current_ray_door)
+    {
+        texture = cub->door_texture;
+        x_factor = hitY - ((int)(hitY / TILE_SIZE) * TILE_SIZE);
+        tex_x = (texture->width * x_factor) / TILE_SIZE;
+
+        tex_y_step = (float)texture->height / wall_height;
+        tex_y = tex_y_off * tex_y_step;
+        current_y = wall_start_top_y;
+        if(current_y < 0)
+        {
+            current_y = 0;
+            tex_y = abs(wall_start_top_y) * tex_y_step;
+        }
+        while (current_y < HEIGHT && current_y < wall_start_top_y + wall_height)
+        {
+            int tex_color = get_color_texture(texture, tex_x, tex_y);
+            ft_pixel_put(cub->image, wall_start_top_x, current_y, tex_color);
+            tex_y += tex_y_step;
+            current_y++;
+        }
+    }
 }
-void render_wall(t_cub3d *cub, double dist, double ray_angle, bool is_vertical, int current_ray)
+
+
+t_direction get_direction(double angle)
+{
+    t_direction direction = {false, false, false, false};
+    if (angle > 0 && angle < M_PI)
+        direction.down = true;
+    else
+        direction.up = true;
+    if (angle < M_PI_2 || angle > 3 * M_PI_2)
+        direction.right = true;
+    else
+        direction.left = true;
+    return direction;
+}
+
+
+
+
+int ray_cast(t_cub3d *cub, t_map *map, double angle, int color, int current_ray)
 {
 
-    //first, lets fix the fisheye effect
-    double angle = cub->camera.dir - ray_angle;
     if(angle < 0)
         angle += 2 * M_PI;
     if(angle > 2 * M_PI)
         angle -= 2 * M_PI;
-    dist = dist * cos(angle);
-    float distance_projection_plane = (WIDTH / 2) / tan(degree_to_radian(cub->camera.fov) / 2);
-    double wall_height = (TILE_SIZE / dist)  *  distance_projection_plane;
-    // we need to take into account the TILE_SIZE
-    if(wall_height > HEIGHT)
-        wall_height = HEIGHT;
-    
-    int wall_start_top_y = (HEIGHT - wall_height) / 2;
-    int wall_start_top_x = current_ray;
-    int wall_end_bottom_y = wall_start_top_y + wall_height;
+    cub->is_current_ray_door = false;
+    bool is_h_ray_door = false;
+    bool is_v_ray_door = false;
 
-    int color = 0xFF000080;
-    if(is_vertical) // MAKE IT A BIT DARKER
-        color = 0xFF000060;
-    ft_draw_line(cub, &(t_vec2){wall_start_top_x, wall_start_top_y}, &(t_vec2){wall_start_top_x, wall_end_bottom_y}, color);
-}
+    int door_h_index = -1;
+    int door_v_index = -1;
 
-int ray_cast(t_cub3d *cub, t_map *map, double angle, bool debug, int color, int current_ray)
-{
-
-    if(angle < 0)
-        angle += 2 * M_PI;
-    if(angle > 2 * M_PI)
-        angle -= 2 * M_PI;
-    // vertical intersection
-    t_vec2 h_inter = solve_h_intersections(&cub->camera, map, angle);
-    t_vec2 v_inter = solve_v_intersections(&cub->camera, map, angle);
+    t_vec2 h_inter = solve_h_intersections(cub, map, angle , get_direction(angle));
+    is_h_ray_door = cub->is_current_ray_door;
+    door_h_index = cub->current_ray_door_index;
+    cub->is_current_ray_door = false;
+    cub->current_ray_door_index = -1;
+    t_vec2 v_inter = solve_v_intersections(cub, map, angle, get_direction(angle));
+    is_v_ray_door = cub->is_current_ray_door;
+    door_v_index = cub->current_ray_door_index;
     t_vec2 inter;
-    // we will do horizontal intersection in a bit, first lets visualize the vertical intersection
-
-    debug = false;
 
     // lets calculate the distance between the player and the intersection
     float v_dist = sqrt(pow(v_inter.x - cub->camera.pos.x, 2) + pow(v_inter.y - cub->camera.pos.y, 2));
     float h_dist = sqrt(pow(h_inter.x - cub->camera.pos.x, 2) + pow(h_inter.y - cub->camera.pos.y, 2));
 
     if (v_dist < h_dist)
-        inter = v_inter;
-    else
-        inter = h_inter;
-    float dist = sqrt(pow(inter.x - cub->camera.pos.x, 2) + pow(inter.y - cub->camera.pos.y, 2));
-    if (debug)
     {
-            ft_draw_line(cub, &(t_vec2){cub->camera.pos.x * ZOOM, cub->camera.pos.y * ZOOM}, 
-            &(t_vec2){inter.x * ZOOM, inter.y * ZOOM}, color);
+        inter = v_inter;
+        cub->is_current_ray_door = is_v_ray_door;
+        cub->current_ray_door_index = door_v_index;
+    }
+       
+    else
+    {
+        inter = h_inter;
+        cub->is_current_ray_door = is_h_ray_door;
+        cub->current_ray_door_index = door_h_index;
+    }
+
+    float dist = sqrt(pow(inter.x - cub->camera.pos.x, 2) + pow(inter.y - cub->camera.pos.y, 2));
+    if (cub->display_debug)
+    {
+            ft_draw_line(cub, &(t_vec2){cub->camera.pos.x * cub->minimap_scale, cub->camera.pos.y * cub->minimap_scale}, 
+            &(t_vec2){inter.x * cub->minimap_scale, inter.y * cub->minimap_scale}, color);
     }
     else
     {
-        render_wall(cub, dist, angle, v_dist < h_dist,  current_ray);
+        render_wall(cub, dist, angle, v_dist < h_dist,  current_ray, inter.x, inter.y);
     }
 
     return dist;
