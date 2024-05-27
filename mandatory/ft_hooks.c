@@ -9,24 +9,18 @@ void  ft_key_hooks(void *param)
     float move_speed = 4;
     float rot_speed = 0.07;
 
-    int dist_w = ray_cast(cub, &cub->map, cub->camera.dir, 0, 0x0000FFFF);
-    if(mlx_is_key_down(cub->mlx, MLX_KEY_E) && cub->is_current_ray_door)
+    int dist_w = ray_cast(cub, &cub->map, cub->camera.dir, 0, 0x0000FFFF, true);
+    if(mlx_is_key_down(cub->mlx, MLX_KEY_E) && cub->is_current_ray_door && dist_w < TILE_SIZE * 2)
     {
         cub->door_infos[cub->current_ray_door_index].is_opening = !cub->door_infos[cub->current_ray_door_index].is_opening;
-        printf("Door %d is %s\n", cub->current_ray_door_index, cub->door_infos[cub->current_ray_door_index].is_opening ? "opening" : "closing");
     }
+    if(cub->is_current_ray_door && cub->door_infos[cub->current_ray_door_index].close_factor <= 0.21)
+        dist_w = 30; // allow to move through the door
 
-    if(cub->is_current_ray_door)
-        dist_w -= TILE_SIZE / 1.2;
-    int dist_s = ray_cast(cub, &cub->map, cub->camera.dir + M_PI, 0, 0x0000FFFF);
-    if(cub->is_current_ray_door)
-        dist_s -= TILE_SIZE / 1.2;
-    int dist_a = ray_cast(cub, &cub->map, cub->camera.dir - M_PI_2, 0, 0x0000FFFF);
-    if(cub->is_current_ray_door)
-        dist_a -= TILE_SIZE / 1.2;
-    int dist_d = ray_cast(cub, &cub->map, cub->camera.dir + M_PI_2, 0, 0x0000FFFF);
-    if(cub->is_current_ray_door)
-        dist_d -= TILE_SIZE / 1.2;
+    int dist_s = ray_cast(cub, &cub->map, cub->camera.dir + M_PI, 0, 0x0000FFFF, false);
+    int dist_a = ray_cast(cub, &cub->map, cub->camera.dir - M_PI_2, 0, 0x0000FFFF, false);
+    int dist_d = ray_cast(cub, &cub->map, cub->camera.dir + M_PI_2, 0, 0x0000FFFF, false);
+
 
  
 

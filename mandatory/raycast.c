@@ -1,6 +1,6 @@
 #include "cub3d.h"
 
-bool is_solid_tile(t_vec2 inter, t_vec2 *origin,  t_map *map, t_cub3d* cub, bool vetical_check, float ray_angle, float xo, float yo)
+bool is_solid_tile(t_vec2 inter, t_vec2 *origin, t_map *map, t_cub3d* cub, bool vetical_check, float ray_angle, float xo, float yo, bool is_for_collision)
 {
     int x = inter.x / TILE_SIZE;
     int y = inter.y / TILE_SIZE;
@@ -11,7 +11,10 @@ bool is_solid_tile(t_vec2 inter, t_vec2 *origin,  t_map *map, t_cub3d* cub, bool
 
     if (x <= 0 || y <= 0 || x >= map->width - 1 || y >= map->height - 1)
         return true;
-    if (map->addr[y][x] == '1' || map->addr[y][x] == 'V' || map->addr[y][x] == 'H')
+    if(map->addr[y][x] == '1')
+        return true;
+
+    if (map->addr[y][x] == 'V' || map->addr[y][x] == 'H')
     {
         if (map->addr[y][x] == 'V' || map->addr[y][x] == 'H') //NOTE : remove this for loop, use while
         {
@@ -21,6 +24,12 @@ bool is_solid_tile(t_vec2 inter, t_vec2 *origin,  t_map *map, t_cub3d* cub, bool
                 {
                     if((vetical_check && !cub->door_infos[i].is_vertical) || (!vetical_check && cub->door_infos[i].is_vertical))
                         return false;
+                    if(is_for_collision)
+                    {
+                        cub->is_current_ray_door = true;
+                        cub->current_ray_door_index = i;
+                        return true;
+                    }
                     {
                         if(cub->door_infos[i].is_vertical)
                         {
@@ -52,7 +61,7 @@ bool is_solid_tile(t_vec2 inter, t_vec2 *origin,  t_map *map, t_cub3d* cub, bool
     return false;
 }
 
-t_vec2 solve_h_intersections(t_cub3d *cub, t_map *map, double angle, t_direction direction)
+t_vec2 solve_h_intersections(t_cub3d *cub, t_map *map, double angle, t_direction direction, bool check_door)
 {
     t_vec2 inter;
     float xo;
@@ -73,7 +82,7 @@ t_vec2 solve_h_intersections(t_cub3d *cub, t_map *map, double angle, t_direction
         t_vec2 point = {inter.x, inter.y};
         if(direction.up)
             point.y -= 1;
-        if (is_solid_tile(point, &inter, map, cub, false, angle, xo, yo))
+        if (is_solid_tile(point, &inter, map, cub, false, angle, xo, yo, check_door))
             break;
         inter.x += xo;
         inter.y += yo;
@@ -81,7 +90,7 @@ t_vec2 solve_h_intersections(t_cub3d *cub, t_map *map, double angle, t_direction
     return inter;
 }
 
-t_vec2 solve_v_intersections(t_cub3d *cub, t_map *map, double dir, t_direction direction)
+t_vec2 solve_v_intersections_old(t_cub3d *cub, t_map *map, double dir, t_direction direction, bool check_door)
 {
     t_vec2 inter;
     float xo;
@@ -102,12 +111,17 @@ t_vec2 solve_v_intersections(t_cub3d *cub, t_map *map, double dir, t_direction d
         t_vec2 point = {inter.x, inter.y};
         if (direction.left)
             point.x -= 1;
-        if (is_solid_tile(point, &inter, map, cub, true, dir, xo, yo))
+        if (is_solid_tile(point, &inter, map, cub, true, dir, xo, yo, check_door))
             break;
         inter.x += xo;
         inter.y += yo;
     }
     return inter;
+}
+
+t_vec2 solve_v_intersections(t_cub3d *cub, t_map *map, t_cast_info *cast_info)
+{
+    
 }
 
 
@@ -205,7 +219,9 @@ void render_wall(t_cub3d *cub, double dist, double ray_angle, bool is_vertical, 
     {
         texture = cub->door_texture;
         x_factor = hitY - ((int)(hitY / TILE_SIZE) * TILE_SIZE);
+        float tex_x_off = texture->width  - texture->width * cub->door_infos[cub->current_ray_door_index].close_factor;
         tex_x = (texture->width * x_factor) / TILE_SIZE;
+        tex_x -= tex_x_off;
 
         tex_y_step = (float)texture->height / wall_height;
         tex_y = tex_y_off * tex_y_step;
@@ -242,8 +258,8 @@ t_direction get_direction(double angle)
 
 
 
-
-int ray_cast(t_cub3d *cub, t_map *map, double angle, int color, int current_ray)
+// struct cast_info : angle mini map color, current_ray, is_for_collision
+int ray_cast(t_cub3d *cub, t_map *map, double angle, int color, int current_ray, bool is_for_collision)
 {
 
     if(angle < 0)
@@ -257,12 +273,12 @@ int ray_cast(t_cub3d *cub, t_map *map, double angle, int color, int current_ray)
     int door_h_index = -1;
     int door_v_index = -1;
 
-    t_vec2 h_inter = solve_h_intersections(cub, map, angle , get_direction(angle));
+    t_vec2 h_inter = solve_h_intersections(cub, map, angle , get_direction(angle), is_for_collision);
     is_h_ray_door = cub->is_current_ray_door;
     door_h_index = cub->current_ray_door_index;
     cub->is_current_ray_door = false;
     cub->current_ray_door_index = -1;
-    t_vec2 v_inter = solve_v_intersections(cub, map, angle, get_direction(angle));
+    t_vec2 v_inter = solve_v_intersections(cub, map, angle, get_direction(angle), is_for_collision);
     is_v_ray_door = cub->is_current_ray_door;
     door_v_index = cub->current_ray_door_index;
     t_vec2 inter;

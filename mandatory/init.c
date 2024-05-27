@@ -30,6 +30,9 @@ int init_cub3d(t_cub3d *cub)
 	cub->east_texture = mlx_load_png("textures/wall_ea.png");
 	cub->door_texture = mlx_load_png("textures/door.png");
 
+	cub->sky_color = 0xF0F0FFFF;
+	cub->floor_color = 0x404000FF;
+
 	if(!cub->north_texture || !cub->south_texture || !cub->west_texture || !cub->east_texture)
 	 	printf("Error loading textures\n");
 

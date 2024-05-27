@@ -1,16 +1,13 @@
 #include "cub3d.h"
 
-// we need to draw the map from up so we can visualize the raycasting
-void draw_from_above(t_cub3d *cub)
+void draw_from_above(t_cub3d *cub, int map_width, int map_height, double scale)
 {
-    int map_width = cub->map.width;
-    int map_height = cub->map.height;
+    int x;
+    int y;
+    int gap;
 
-    int x = 0;
-    int y = 0;
-    int gap = 1;
-
-    double scale = cub->minimap_scale;
+    y = 0;
+    gap = 1;
     while (y < map_height)
     {
         x = 0;
@@ -28,8 +25,6 @@ void draw_from_above(t_cub3d *cub)
         }
         y++;
     }
-
-
 }
 
 void draw_player(t_cub3d *cub)
@@ -40,28 +35,26 @@ void draw_player(t_cub3d *cub)
 
 void draw_bg(t_cub3d *cub)
 {
-    int floor_color = 0x404000FF;
-    int sky = 0xF0F0FFff;
+    int x;
+    int y;
 
-    int x = 0;
-    int y = 0;
+    y = 0;
     while (y < HEIGHT / 2)
     {
         x = 0;
         while (x < WIDTH)
         {
-            ft_pixel_put(cub->image, x, y, sky);
+            ft_pixel_put(cub->image, x, y, cub->sky_color);
             x++;
         }
         y++;
     }
-
     while (y < HEIGHT)
     {
         x = 0;
         while (x < WIDTH)
         {
-            ft_pixel_put(cub->image, x, y, floor_color);
+            ft_pixel_put(cub->image, x, y, cub->floor_color);
             x++;
         }
         y++;
@@ -71,7 +64,9 @@ void draw_bg(t_cub3d *cub)
 
 void doors_update(t_cub3d *cub)
 {
-    int i = 0;
+    int i;
+
+    i = 0;
     while (i < MAX_DOORS)
     {
         if (cub->door_infos[i].map_x == -1)
@@ -79,9 +74,9 @@ void doors_update(t_cub3d *cub)
         if (cub->door_infos[i].is_opening)
         {
             cub->door_infos[i].close_factor -= 0.01;
-            if (cub->door_infos[i].close_factor <= 0)
+            if (cub->door_infos[i].close_factor <= 0.2)
             {
-                cub->door_infos[i].close_factor = 0;
+                cub->door_infos[i].close_factor = 0.2;
             }
         }
         else
@@ -96,37 +91,50 @@ void doors_update(t_cub3d *cub)
     }
 }
 
-void render_loop_handle (void *param)
+void pre_render(t_cub3d *cub)
 {
-    t_cub3d *cub = (t_cub3d *)param;
+    doors_update(cub);
     if(cub->display_debug == false)
         draw_bg(cub);
     else 
     {
         ft_clear_image(cub->image);
-        draw_from_above(cub);
+        draw_from_above(cub, cub->map.width, cub->map.height, cub->minimap_scale);
     }
-    doors_update(cub);
-    double angle = cub->camera.dir - degree_to_radian(cub->camera.fov / 2);
-    double step = degree_to_radian(cub->camera.fov) / WIDTH;
+}
+
+void render(t_cub3d *cub)
+{
+    double angle;
+    double step;
+    int rays;
+
+    rays = 0;
+    angle = cub->camera.dir - degree_to_radian(cub->camera.fov / 2);
+    step = degree_to_radian(cub->camera.fov) / WIDTH;
     if(angle < 0)
         angle += 2 * M_PI;
     if(angle > 2 * M_PI)
         angle -= 2 * M_PI;
-    int rays = 0;
     while (rays < WIDTH)
     {
-
-        ray_cast(cub, &cub->map, angle, 0xFF0000ff, rays);
+        ray_cast(cub, &cub->map, angle, 0xFF0000ff, rays, false);
         angle += step;
         rays++;
-
         if(angle < 0)
             angle += 2 * M_PI;
         if(angle > 2 * M_PI)
             angle -= 2 * M_PI;
     }
-   
-  if(cub->display_debug == true)
+}
+
+void    render_loop_handle(void *param)
+{
+    t_cub3d *cub;
+
+    cub = (t_cub3d *)param;
+    pre_render(cub);
+    render(cub);
+   if(cub->display_debug == true)
     draw_player(cub);
 }

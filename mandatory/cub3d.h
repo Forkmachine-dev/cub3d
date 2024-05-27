@@ -54,6 +54,18 @@ typedef struct s_door_info
     bool is_opening;
 }              t_door_info;
 
+typedef struct s_cast_info
+{
+    double angle;
+    double x_incerement;
+    double y_incerement;
+    int curent_ray;
+    bool is_for_collision;
+    bool is_vertical;
+    t_vec2 inter;
+
+}              t_cast_info;
+
 typedef struct s_cub3d
 {
     mlx_t    *mlx;
@@ -71,6 +83,8 @@ typedef struct s_cub3d
     mlx_texture_t *door_texture;
     bool is_current_ray_door;
     int current_ray_door_index;
+    int sky_color;
+    int floor_color;
 }               t_cub3d;
 
 int init_cub3d(t_cub3d *cub);
@@ -89,7 +103,7 @@ void draw_square(t_cub3d *cub, t_vec2 pos, int size, int color);
 void draw_circle(t_cub3d *cub, t_vec2 pos, int radius, int color);
 double	degree_to_radian(double angle_degrees);
 void  ft_key_hooks(void *param);
-int ray_cast(t_cub3d *cub, t_map *map, double angle, int color, int current_ray);
+int ray_cast(t_cub3d *cub, t_map *map, double angle, int color, int current_ray, bool is_for_collision);
 int32_t    get_color_texture(mlx_texture_t *txt, int x, int y);
 
 #endif
