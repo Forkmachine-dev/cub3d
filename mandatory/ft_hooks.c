@@ -9,18 +9,30 @@ void  ft_key_hooks(void *param)
     float move_speed = 4;
     float rot_speed = 0.07;
 
-    int dist_w = ray_cast(cub, &cub->map, cub->camera.dir, 0, 0x0000FFFF, true);
-    if(mlx_is_key_down(cub->mlx, MLX_KEY_E) && cub->is_current_ray_door && dist_w < TILE_SIZE * 2)
+    t_cast_request request;
+    request.angle = cub->camera.dir;
+    request.color = 0x0000FFFF;
+    request.current_ray = 0;
+    request.is_for_collision = true;
+
+   // int dist_w = ray_cast(cub, &cub->map, cub->camera.dir, 0, 0x0000FFFF, true);
+    float dist_w = ray_cast(cub, &cub->map, &request);
+    if(mlx_is_key_down(cub->mlx, MLX_KEY_E) && cub->cast_result.current_ray_is_door && dist_w < TILE_SIZE * 2)
     {
-        cub->door_infos[cub->current_ray_door_index].is_opening = !cub->door_infos[cub->current_ray_door_index].is_opening;
+        cub->door_infos[cub->cast_result.current_ray_door_index].is_opening = !cub->door_infos[cub->cast_result.current_ray_door_index].is_opening;
     }
-    if(cub->is_current_ray_door && cub->door_infos[cub->current_ray_door_index].close_factor <= 0.21)
+    if(cub->cast_result.current_ray_is_door && cub->door_infos[cub->cast_result.current_ray_door_index].close_factor <= 0.21)
         dist_w = 30; // allow to move through the door
 
-    int dist_s = ray_cast(cub, &cub->map, cub->camera.dir + M_PI, 0, 0x0000FFFF, false);
-    int dist_a = ray_cast(cub, &cub->map, cub->camera.dir - M_PI_2, 0, 0x0000FFFF, false);
-    int dist_d = ray_cast(cub, &cub->map, cub->camera.dir + M_PI_2, 0, 0x0000FFFF, false);
-
+    // int dist_s = ray_cast(cub, &cub->map, cub->camera.dir + M_PI, 0, 0x0000FFFF, false);
+    // int dist_a = ray_cast(cub, &cub->map, cub->camera.dir - M_PI_2, 0, 0x0000FFFF, false);
+    // int dist_d = ray_cast(cub, &cub->map, cub->camera.dir + M_PI_2, 0, 0x0000FFFF, false);
+    request.angle = cub->camera.dir + M_PI;
+    float dist_s = ray_cast(cub, &cub->map, &request);
+    request.angle = cub->camera.dir - M_PI_2;
+    float dist_a = ray_cast(cub, &cub->map, &request);
+    request.angle = cub->camera.dir + M_PI_2;
+    float dist_d = ray_cast(cub, &cub->map, &request);
 
  
 

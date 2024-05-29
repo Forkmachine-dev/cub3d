@@ -105,26 +105,19 @@ void pre_render(t_cub3d *cub)
 
 void render(t_cub3d *cub)
 {
-    double angle;
+    t_cast_request request;
     double step;
-    int rays;
 
-    rays = 0;
-    angle = cub->camera.dir - degree_to_radian(cub->camera.fov / 2);
+    request.current_ray = 0;
+    request.angle = cub->camera.dir - degree_to_radian(cub->camera.fov / 2);
+    request.color = 0xFF0000FF;
+    request.is_for_collision = false;
     step = degree_to_radian(cub->camera.fov) / WIDTH;
-    if(angle < 0)
-        angle += 2 * M_PI;
-    if(angle > 2 * M_PI)
-        angle -= 2 * M_PI;
-    while (rays < WIDTH)
+    while (request.current_ray < WIDTH)
     {
-        ray_cast(cub, &cub->map, angle, 0xFF0000ff, rays, false);
-        angle += step;
-        rays++;
-        if(angle < 0)
-            angle += 2 * M_PI;
-        if(angle > 2 * M_PI)
-            angle -= 2 * M_PI;
+        ray_cast(cub, &cub->map, &request);
+        request.angle += step;
+        request.current_ray++;
     }
 }
 

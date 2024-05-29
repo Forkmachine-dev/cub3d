@@ -54,17 +54,42 @@ typedef struct s_door_info
     bool is_opening;
 }              t_door_info;
 
-typedef struct s_cast_info
+typedef struct s_cast_request
 {
     double angle;
-    double x_incerement;
-    double y_incerement;
-    int curent_ray;
+    int color;
+    int current_ray;
+    bool is_for_collision;
+}              t_cast_request;
+
+typedef struct s_cast_result
+{
+    double angle;
+    double xo;
+    double yo;
+    int current_ray;
     bool is_for_collision;
     bool is_vertical;
+    bool current_ray_is_door;
+    int current_ray_door_index;
+    double dist;
+    t_direction direction; 
     t_vec2 inter;
 
-}              t_cast_info;
+}              t_cast_result;
+
+typedef struct s_wall_render_info
+{
+    double wall_height;
+    double wall_top;
+    double hit_x;
+    double hit_y;
+    float tex_x;
+    float tex_y; 
+    double tex_y_step;
+    mlx_texture_t *texture;
+
+}             t_wall_render_info;
 
 typedef struct s_cub3d
 {
@@ -81,8 +106,7 @@ typedef struct s_cub3d
     mlx_texture_t *west_texture;
     mlx_texture_t *east_texture;
     mlx_texture_t *door_texture;
-    bool is_current_ray_door;
-    int current_ray_door_index;
+    t_cast_result cast_result;
     int sky_color;
     int floor_color;
 }               t_cub3d;
@@ -103,7 +127,7 @@ void draw_square(t_cub3d *cub, t_vec2 pos, int size, int color);
 void draw_circle(t_cub3d *cub, t_vec2 pos, int radius, int color);
 double	degree_to_radian(double angle_degrees);
 void  ft_key_hooks(void *param);
-int ray_cast(t_cub3d *cub, t_map *map, double angle, int color, int current_ray, bool is_for_collision);
+float ray_cast(t_cub3d *cub, t_map *map, t_cast_request *request);
 int32_t    get_color_texture(mlx_texture_t *txt, int x, int y);
 
 #endif
