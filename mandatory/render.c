@@ -5,9 +5,11 @@ void draw_from_above(t_cub3d *cub, int map_width, int map_height, double scale)
     int x;
     int y;
     int gap;
-
+    
     y = 0;
-    gap = 1;
+    gap = 0;
+    (void)gap;
+    (void)scale;
     while (y < map_height)
     {
         x = 0;
@@ -30,7 +32,7 @@ void draw_from_above(t_cub3d *cub, int map_width, int map_height, double scale)
 void draw_player(t_cub3d *cub)
 {
     double scale = cub->minimap_scale;
-    draw_circle(cub, (t_vec2){cub->camera.pos.x * scale, cub->camera.pos.y * scale}, 7, 0xFF000080);
+    draw_circle(cub, (t_vec2){cub->camera.pos.x * scale, cub->camera.pos.y * scale}, 4, 0xFF000080);
 }
 
 void draw_bg(t_cub3d *cub)
@@ -94,13 +96,7 @@ void doors_update(t_cub3d *cub)
 void pre_render(t_cub3d *cub)
 {
     doors_update(cub);
-    if(cub->display_debug == false)
-        draw_bg(cub);
-    else 
-    {
-        ft_clear_image(cub->image);
-        draw_from_above(cub, cub->map.width, cub->map.height, cub->minimap_scale);
-    }
+    draw_bg(cub);
 }
 
 void render(t_cub3d *cub)
@@ -121,13 +117,74 @@ void render(t_cub3d *cub)
     }
 }
 
+void update_delta_time(t_cub3d *cub)
+{
+    double current_time;
+
+    current_time = mlx_get_time();
+    cub->delta_time = current_time - cub->last_time;
+    cub->last_time = current_time;
+}
+
+void render_gun(t_cub3d *cub)
+{
+    mlx_texture_t *gun_texture;
+    uint32_t tex_x;
+    uint32_t tex_y;
+    uint32_t screen_x;
+    uint32_t screen_y;
+    int color;
+
+    gun_texture = cub->gun_textures[cub->current_gun_index];
+    // we render the gun in the bottom center of the screen
+    screen_x = WIDTH / 2 - gun_texture->width / 2;
+    screen_y = HEIGHT - gun_texture->height;
+    tex_y = 0;
+  
+    while (tex_y < gun_texture->height && screen_y + tex_y < HEIGHT)
+    {
+  
+        tex_x = 0;
+        while (tex_x < gun_texture->width && screen_x + tex_x < WIDTH)
+        {
+            color = get_color_texture(gun_texture, tex_x, tex_y);
+            if (color != 0)
+                ft_pixel_put(cub->image, screen_x + tex_x, screen_y + tex_y, color);
+            tex_x++;
+        }
+        tex_y++;
+    }
+
+}
+
+void update_gun(t_cub3d *cub)
+{
+    if (cub->gun_state.is_firing)
+    {
+        cub->gun_state.sprite_time += cub->delta_time;
+        if (cub->gun_state.sprite_time > 0.05)
+        {
+            cub->gun_state.sprite_time = 0;
+            cub->current_gun_index++;
+            if (cub->current_gun_index >= 6)
+            {
+                cub->current_gun_index = 0;
+                cub->gun_state.is_firing = false;
+            }
+        }
+    }
+}
 void    render_loop_handle(void *param)
 {
     t_cub3d *cub;
 
+
     cub = (t_cub3d *)param;
+    update_delta_time(cub);
     pre_render(cub);
     render(cub);
-   if(cub->display_debug == true)
+    update_gun(cub);
+    render_gun(cub);
+    draw_from_above(cub, cub->map.width, cub->map.height, cub->minimap_scale);
     draw_player(cub);
 }

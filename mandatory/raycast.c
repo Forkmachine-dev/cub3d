@@ -1,244 +1,123 @@
 #include "cub3d.h"
 
-bool is_solid_tile(t_vec2 point, t_map *map, t_cub3d* cub, t_cast_result *res)
+void init_tile_check(int *x_map , int *y_map, t_vec2 *point)
 {
-    int x = point.x / TILE_SIZE;
-    int y = point.y / TILE_SIZE;
+    *x_map = point->x / TILE_SIZE;
+    *y_map = point->y / TILE_SIZE;
+}
 
+bool intersect_door(t_cub3d *cub, t_cast_result *res, int i)
+{
     t_vec2 pushed_point = {res->inter.x + (res->xo / 2), res->inter.y + (res->yo / 2)};
-
-    if (x <= 0 || y <= 0 || x >= map->width - 1 || y >= map->height - 1)
-        return true;
-    if(map->addr[y][x] == '1')
-        return true;
-
-    if (map->addr[y][x] == 'V' || map->addr[y][x] == 'H')
+    if(cub->door_infos[i].is_vertical)
     {
-        if (map->addr[y][x] == 'V' || map->addr[y][x] == 'H') //NOTE : remove this for loop, use while
+        float x_factor = pushed_point.y - ((int)(pushed_point.y / TILE_SIZE) * TILE_SIZE);
+        x_factor = (TILE_SIZE - x_factor) / TILE_SIZE;
+        if(x_factor > 1)
+            x_factor = 1;
+        if(x_factor > cub->door_infos[i].close_factor)
+                return false;
+        res->inter = pushed_point;
+    }
+    else
+    {
+        float y_factor = pushed_point.x - ((int)(pushed_point.x / TILE_SIZE) * TILE_SIZE);
+        y_factor = y_factor / TILE_SIZE;
+        if(y_factor > cub->door_infos[i].close_factor)
+                return false;  
+        res->inter = pushed_point;                     
+    }
+    res->current_ray_is_door = true;
+    res->current_ray_door_index = i;
+    return true;
+}
+
+bool handle_door_checking(t_cub3d *cub, t_cast_result *res, int x_map, int y_map)
+{
+    int i;
+    t_map *map;
+
+    i = 0;
+    map = &cub->map;
+    if(!(map->addr[y_map][x_map] == 'V' || map->addr[y_map][x_map] == 'H'))
+        return false;
+    while(i < MAX_DOORS)
+    {
+        if (cub->door_infos[i].map_x == x_map && cub->door_infos[i].map_y == y_map)
         {
-            for (int i = 0; i < MAX_DOORS; i++)
+            if((res->is_vertical && !cub->door_infos[i].is_vertical) 
+                || (!res->is_vertical && cub->door_infos[i].is_vertical))
+                return false;
+            if(res->is_for_collision)
             {
-                if (cub->door_infos[i].map_x == x && cub->door_infos[i].map_y == y)
-                {
-                    if((res->is_vertical && !cub->door_infos[i].is_vertical) || (!res->is_vertical && cub->door_infos[i].is_vertical))
-                        return false;
-                    if(res->is_for_collision)
-                    {
-                        res->current_ray_is_door = true;
-                        res->current_ray_door_index = i;
-                        return true;
-                    }
-                    {
-                        if(cub->door_infos[i].is_vertical)
-                        {
-                            float x_factor = pushed_point.y - ((int)(pushed_point.y / TILE_SIZE) * TILE_SIZE);
-                            x_factor = (TILE_SIZE - x_factor) / TILE_SIZE;
-                            if(x_factor > 1)
-                                x_factor = 1;
-                            if(x_factor > cub->door_infos[i].close_factor)
-                                    return false;
-                            res->inter = pushed_point;
-                        }
-                        else
-                        {
-                            float y_factor = pushed_point.x - ((int)(pushed_point.x / TILE_SIZE) * TILE_SIZE);
-                            y_factor = y_factor / TILE_SIZE;
-                            if(y_factor > cub->door_infos[i].close_factor)
-                                    return false;  
-                            res->inter = pushed_point;                     
-                        }
-                        res->current_ray_is_door = true;
-                        res->current_ray_door_index = i;
-                        break;
-                    }
-                }
+                res->current_ray_is_door = true;
+                res->current_ray_door_index = i;
+                return true;
             }
+            return intersect_door(cub, res, i);
         }
-        return true;
+        i++;
     }
     return false;
 }
 
-
-// void render_wall_old(t_cub3d *cub, double dist, double ray_angle, bool is_vertical, int current_ray, float hitX, float hitY)
-// {
-//     dist = dist * cos(ray_angle - cub->camera.dir);
-//     float distance_projection_plane = (WIDTH / 2) / tanf(degree_to_radian(cub->camera.fov / 2));
-//     double wall_height = (TILE_SIZE / dist)  *  distance_projection_plane;
-
-
-  
-   
-//     int wall_start_top_y = (HEIGHT /2 ) - ((int)wall_height / 2);
-//     int wall_start_top_x = current_ray;;
-
-//     float x_factor = 0;
-//     float tex_x = 0;
-
-//     mlx_texture_t *texture = NULL;
-
-//     if (is_vertical)
-//     {
-//         //if down
-//         x_factor = hitY - ((int)(hitY / TILE_SIZE) * TILE_SIZE);
-//         if (cos(ray_angle) >= 0)
-//         {
- 
-//             texture = cub->east_texture;
-//             tex_x = (cub->east_texture->width * x_factor) / TILE_SIZE;
-
-//         }
-//         else 
-//         {
-//             x_factor = (cub->west_texture->width * x_factor) / TILE_SIZE;
-//             tex_x = cub->west_texture->width - x_factor;
-//             texture = cub->west_texture;
-            
-//         }
-
-      
-//     }
-//     else
-//     {
-//         x_factor = hitX - ((int)(hitX / TILE_SIZE) * TILE_SIZE);
-//         if(sin(ray_angle) < 0)
-//         {
-  
-//             texture = cub->north_texture;
-//             tex_x = (cub->north_texture->width * x_factor) / TILE_SIZE;
-            
-//         }
-//         else 
-//         {
- 
-//             x_factor = (cub->south_texture->width * x_factor) / TILE_SIZE;
-//             tex_x = cub->south_texture->width - x_factor;
-//             texture = cub->south_texture;
-            
-//         }
-
-
-//     }
-
-
-
-//     float tex_y_off = 0;   
-//     float tex_y_step = (float)texture->height / wall_height;;
-//      float tex_y = tex_y_off * tex_y_step;
-
-
-   
-//     int current_y = wall_start_top_y;
-//     if(current_y < 0)
-//     {
-//         current_y = 0;
-//         tex_y = abs(wall_start_top_y) * tex_y_step;
-//     }
-
-    
-
-   
-//    // shade_value = 1;
-
-//     while (current_y < HEIGHT && current_y < wall_start_top_y + wall_height)
-//     {
-//         int tex_color = get_color_texture(texture, tex_x, tex_y);
-//         ft_pixel_put(cub->image, wall_start_top_x, current_y, tex_color);
-//         tex_y += tex_y_step;
-//         current_y++;
-//     }
-
-
-
-//     if(cub->cast_result.current_ray_is_door)
-//     {
-//         texture = cub->door_texture;
-
-//         if(cub->cast_result.is_vertical)
-//         {
-//             x_factor = hitY - ((int)(hitY / TILE_SIZE) * TILE_SIZE);
-//             float tex_x_off = texture->width  - texture->width * cub->door_infos[cub->cast_result.current_ray_door_index].close_factor;
-//             tex_x = (texture->width * x_factor) / TILE_SIZE;
-//             tex_x -= tex_x_off;
-//         }
-//         else
-//         {
-//             x_factor = hitX - ((int)(hitX / TILE_SIZE) * TILE_SIZE);
-//             float tex_x_off = texture->width  - texture->width * cub->door_infos[cub->cast_result.current_ray_door_index].close_factor;
-//             tex_x = (texture->width * x_factor) / TILE_SIZE;
-//             tex_x += tex_x_off;
-//         }
-
-
-//         tex_y_step = (float)texture->height / wall_height;
-//         tex_y = tex_y_off * tex_y_step;
-//         current_y = wall_start_top_y;
-//         if(current_y < 0)
-//         {
-//             current_y = 0;
-//             tex_y = abs(wall_start_top_y) * tex_y_step;
-//         }
-
-
-//         while (current_y < HEIGHT && current_y < wall_start_top_y + wall_height)
-//         {
-//             int tex_color = get_color_texture(texture, tex_x, tex_y);
-//             ft_pixel_put(cub->image, wall_start_top_x, current_y, tex_color);
-//             tex_y += tex_y_step;
-//             current_y++;
-//         }
-//     }
-// }
-
-void render_door(t_cub3d *cub, t_cast_result *res, int wall_start_top_y, int wall_height)
+bool is_solid_tile(t_vec2 point, t_map *map, t_cub3d* cub, t_cast_result *res)
 {
-    mlx_texture_t *texture = cub->door_texture;
-    float x_factor = 0;
-    float tex_x = 0;
-    float hitX = res->inter.x;
-    float hitY = res->inter.y;
-    float tex_y_off = 0;
-    float tex_y_step = (float)texture->height / wall_height;
-    float tex_y = tex_y_off * tex_y_step;
-    int current_y = wall_start_top_y;
+    int x;
+    int y;
 
-    if(cub->cast_result.current_ray_is_door)
+    init_tile_check(&x, &y, &point);
+    if (x <= 0 || y <= 0 || x >= map->width - 1 || y >= map->height - 1)
+        return true;
+    if(map->addr[y][x] == '1')
+        return true;
+    return handle_door_checking(cub, res, x, y);
+}
+
+void solve_door_texture(t_cub3d *cub, t_cast_result *res, t_wall_render_info *wr)
+{
+    float x_factor;
+    float tex_x_off;
+
+    wr->texture = cub->door_texture;
+    wr->tex_y_step = (float)wr->texture->height / wr->wall_height;
+    if(res->is_vertical)
     {
-        texture = cub->door_texture;
+        x_factor = wr->hit_y - ((int)(wr->hit_y / TILE_SIZE) * TILE_SIZE);
+        tex_x_off = wr->texture->width  - wr->texture->width * cub->door_infos[res->current_ray_door_index].close_factor;
+        wr->tex_x = (wr->texture->width * x_factor) / TILE_SIZE;
+        wr->tex_x -= tex_x_off;
+    }
+    else
+    {
+        x_factor = wr->hit_x - ((int)(wr->hit_x / TILE_SIZE) * TILE_SIZE);
+        tex_x_off = wr->texture->width  - wr->texture->width * cub->door_infos[res->current_ray_door_index].close_factor;
+        wr->tex_x = (wr->texture->width * x_factor) / TILE_SIZE;
+        wr->tex_x += tex_x_off;
+    }
+}
 
-        if(cub->cast_result.is_vertical)
-        {
-            x_factor = hitY - ((int)(hitY / TILE_SIZE) * TILE_SIZE);
-            float tex_x_off = texture->width  - texture->width * cub->door_infos[cub->cast_result.current_ray_door_index].close_factor;
-            tex_x = (texture->width * x_factor) / TILE_SIZE;
-            tex_x -= tex_x_off;
-        }
-        else
-        {
-            x_factor = hitX - ((int)(hitX / TILE_SIZE) * TILE_SIZE);
-            float tex_x_off = texture->width  - texture->width * cub->door_infos[cub->cast_result.current_ray_door_index].close_factor;
-            tex_x = (texture->width * x_factor) / TILE_SIZE;
-            tex_x += tex_x_off;
-        }
+void render_door(t_cub3d *cub, t_cast_result *res, t_wall_render_info *wr)
+{
+    int current_y;
 
-
-        tex_y_step = (float)texture->height / wall_height;
-        tex_y = tex_y_off * tex_y_step;
-        current_y = wall_start_top_y;
-        if(current_y < 0)
-        {
-            current_y = 0;
-            tex_y = abs(wall_start_top_y) * tex_y_step;
-        }
-
-
-        while (current_y < HEIGHT && current_y < wall_start_top_y + wall_height)
-        {
-            int tex_color = get_color_texture(texture, tex_x, tex_y);
-            ft_pixel_put(cub->image, res->current_ray, current_y, tex_color);
-            tex_y += tex_y_step;
-            current_y++;
-        }
+    if(!res->current_ray_is_door)
+        return;
+    solve_door_texture(cub, res, wr);
+    wr->tex_y_step = (float)wr->texture->height / wr->wall_height;
+    wr->tex_y = 0;
+    current_y = wr->wall_top;
+    if(current_y < 0)
+    {
+        current_y = 0;
+        wr->tex_y = abs((int)wr->wall_top) * wr->tex_y_step;
+    }
+    while (current_y < HEIGHT && current_y < wr->wall_top + wr->wall_height)
+    {
+        int tex_color = get_color_texture(wr->texture, wr->tex_x, wr->tex_y);
+        ft_pixel_put(cub->image, res->current_ray, current_y, tex_color);
+        wr->tex_y += wr->tex_y_step;
+        current_y++;
     }
 }
 
@@ -256,64 +135,73 @@ void build_wall_render_info(t_cub3d *cub, t_cast_result *res, t_wall_render_info
     wr->hit_y = res->inter.y;
 }
 
-void render_wall(t_cub3d *cub, t_cast_result *res)
+void solve_h_texture(t_cub3d *cub, t_cast_result *res, t_wall_render_info *wr)
 {
-    t_wall_render_info wr;
-    float x_factor;
+    float x_factor = wr->hit_x - ((int)(wr->hit_x / TILE_SIZE) * TILE_SIZE);
+    if(sin(res->angle) < 0)
+    {
+        wr->texture = cub->north_texture;
+        wr->tex_x = (cub->north_texture->width * x_factor) / TILE_SIZE;
+    }
+    else 
+    {
+        x_factor = (cub->south_texture->width * x_factor) / TILE_SIZE;
+        wr->tex_x = cub->south_texture->width - x_factor;
+        wr->texture = cub->south_texture;
+    }
+}
 
+void solve_v_texture(t_cub3d *cub, t_cast_result *res, t_wall_render_info *wr)
+{
+    float x_factor = wr->hit_y - ((int)(wr->hit_y / TILE_SIZE) * TILE_SIZE);
+    if (cos(res->angle) >= 0)
+    {
+        wr->texture = cub->east_texture;
+        wr->tex_x = (cub->east_texture->width * x_factor) / TILE_SIZE;
+    }
+    else 
+    {
+        x_factor = (cub->west_texture->width * x_factor) / TILE_SIZE;
+        wr->tex_x = cub->west_texture->width - x_factor;
+        wr->texture = cub->west_texture;
+    }
+}
 
+void render_wall(t_cub3d *cub, t_cast_result *res, t_wall_render_info *wr)
+{
+    int current_y;
+    int tex_color;
 
-    build_wall_render_info(cub, res, &wr);
+    if(res->current_ray_is_door)
+      return;
     if (res->is_vertical)
-    {
-        x_factor = wr.hit_y - ((int)(wr.hit_y / TILE_SIZE) * TILE_SIZE);
-        if (cos(res->angle) >= 0)
-        {
-            wr.texture = cub->east_texture;
-            wr.tex_x = (cub->east_texture->width * x_factor) / TILE_SIZE;
-        }
-        else 
-        {
-            x_factor = (cub->west_texture->width * x_factor) / TILE_SIZE;
-            wr.tex_x = cub->west_texture->width - x_factor;
-            wr.texture = cub->west_texture;
-        }
-    }
+      solve_v_texture(cub, res, wr);
     else
-    {
-        x_factor = wr.hit_x - ((int)(wr.hit_x / TILE_SIZE) * TILE_SIZE);
-        if(sin(res->angle) < 0)
-        {
-  
-            wr.texture = cub->north_texture;
-            wr.tex_x = (cub->north_texture->width * x_factor) / TILE_SIZE;
-            
-        }
-        else 
-        {
-            x_factor = (cub->south_texture->width * x_factor) / TILE_SIZE;
-            wr.tex_x = cub->south_texture->width - x_factor;
-            wr.texture = cub->south_texture;
-        }
-    }
-
-     wr.tex_y_step = (float)wr.texture->height / wr.wall_height;;
-
-    int current_y = wr.wall_top;
+     solve_h_texture(cub, res, wr);
+    wr->tex_y_step = (float)wr->texture->height / wr->wall_height;;
+    current_y = wr->wall_top;
     if(current_y < 0)
     {
         current_y = 0;
-        wr.tex_y = abs((int)wr.wall_top) * wr.tex_y_step;
+        wr->tex_y = abs((int)wr->wall_top) * wr->tex_y_step;
     }
-
-    while (current_y < HEIGHT && current_y < wr.wall_top + wr.wall_height)
+    while (current_y < HEIGHT && current_y < wr->wall_top + wr->wall_height)
     {
-        int tex_color = get_color_texture(wr.texture, wr.tex_x, wr.tex_y);
+        tex_color = get_color_texture(wr->texture, wr->tex_x, wr->tex_y);
         ft_pixel_put(cub->image, res->current_ray, current_y, tex_color);
-        wr.tex_y += wr.tex_y_step;
+        wr->tex_y += wr->tex_y_step;
         current_y++;
     }
-    render_door(cub, res, wr.wall_top, wr.wall_height);
+}
+
+
+void render_execute(t_cub3d *cub, t_cast_result *res)
+{
+    t_wall_render_info wr;
+
+    build_wall_render_info(cub, res, &wr);
+    render_wall(cub, res, &wr);
+    render_door(cub, res, &wr);
 }
 
 
@@ -346,6 +234,8 @@ void init_cast_result(t_cast_result *cast_result, t_cast_request *request)
     cast_result->current_ray = request->current_ray;
     cast_result->is_for_collision = request->is_for_collision;
     cast_result->direction = get_direction(request->angle);
+    cast_result->current_ray_is_door = false;
+    cast_result->current_ray_door_index = -1;
 }
 
 void solve_v_intersections(t_cub3d *cub, t_map *map, t_cast_result *res)
@@ -435,14 +325,11 @@ float ray_cast(t_cub3d *cub, t_map *map, t_cast_request *request)
     else
         res = h_res;
     cub->cast_result = res;
-    if (cub->display_debug)
-    {
-        ft_draw_line(cub, &(t_vec2){cub->camera.pos.x * cub->minimap_scale, cub->camera.pos.y * cub->minimap_scale}, 
-            &(t_vec2){res.inter.x * cub->minimap_scale, res.inter.y * cub->minimap_scale}, request->color);
-    }
-    else
-    {
-        render_wall(cub, &res);
-    }
+    // if (cub->display_debug)
+    // {
+    //     ft_draw_line(cub, &(t_vec2){cub->camera.pos.x * cub->minimap_scale, cub->camera.pos.y * cub->minimap_scale}, 
+    //         &(t_vec2){res.inter.x * cub->minimap_scale, res.inter.y * cub->minimap_scale}, request->color);
+    // }
+    render_execute(cub, &res);
     return res.dist;
 }

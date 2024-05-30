@@ -5,6 +5,8 @@ void execute_cub3d(t_cub3d *cub)
     mlx_loop(cub->mlx);
 }
 
+
+
 void fake_map(t_cub3d *cub)
 {
     // now we dont have a map parser, so we will just assume we have a map
@@ -98,9 +100,10 @@ void fake_map(t_cub3d *cub)
     int height_pixel_count_for_initail_scale = cub->map.height * TILE_SIZE * initial_mini_map_scale;
 
    if (width_pixel_count_for_initail_scale > height_pixel_count_for_initail_scale)
-        cub->minimap_scale = ((double)WIDTH) / width_pixel_count_for_initail_scale;
+        cub->minimap_scale = ((double)WIDTH / 5) / width_pixel_count_for_initail_scale;
     else
-        cub->minimap_scale = ((double)HEIGHT) / height_pixel_count_for_initail_scale;
+        cub->minimap_scale = ((double)HEIGHT / 5) / height_pixel_count_for_initail_scale;
+    cub->minimap_scale = round(cub->minimap_scale * 16) / 16;
     printf("minimap scale %f\n", cub->minimap_scale);
 
     // search for the player position

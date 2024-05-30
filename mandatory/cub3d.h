@@ -23,6 +23,12 @@ typedef struct s_vector
     float y;
 }               t_vec2;
 
+typedef struct s_ivector
+{
+    int x;
+    int y;
+}               t_ivec2;
+
 typedef struct s_map
 {
     char **addr;
@@ -91,6 +97,12 @@ typedef struct s_wall_render_info
 
 }             t_wall_render_info;
 
+typedef struct s_gun_state
+{
+    bool is_firing;
+    double sprite_time;
+}               t_gun_state;
+
 typedef struct s_cub3d
 {
     mlx_t    *mlx;
@@ -99,16 +111,22 @@ typedef struct s_cub3d
     t_camera camera;
     t_door_info door_infos[MAX_DOORS];
     t_map map;
-    bool display_debug;
     double minimap_scale;
     mlx_texture_t *north_texture;
     mlx_texture_t *south_texture;
     mlx_texture_t *west_texture;
     mlx_texture_t *east_texture;
     mlx_texture_t *door_texture;
+    mlx_texture_t *gun_textures[6];
+    int current_gun_index;
     t_cast_result cast_result;
     int sky_color;
     int floor_color;
+    bool mouse_locked;
+    double delta_time;
+    double last_time;
+    t_ivec2 mouse_pos;
+    t_gun_state gun_state;
 }               t_cub3d;
 
 int init_cub3d(t_cub3d *cub);
@@ -129,5 +147,7 @@ double	degree_to_radian(double angle_degrees);
 void  ft_key_hooks(void *param);
 float ray_cast(t_cub3d *cub, t_map *map, t_cast_request *request);
 int32_t    get_color_texture(mlx_texture_t *txt, int x, int y);
+void key_pess_hook(mlx_key_data_t key, void *param);
+void fire_mouse_hook(mouse_key_t button, action_t action, modifier_key_t mods, void* param);
 
 #endif
