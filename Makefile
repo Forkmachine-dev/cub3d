@@ -1,7 +1,6 @@
 NAME = cub3D
 NAME_B = cub3D_bonus
 LIBFT = ./shared/libft/libft.a
-USER = mel-akhd
 MAN_FOLDER = ./mandatory/
 BON_FOLDER = ./bonus/
 
