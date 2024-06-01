@@ -6,7 +6,7 @@ BON_FOLDER = ./bonus/
 
 SRC_COMMON = main.c drawing_utils.c init.c render.c ft_math.c terminate.c shapes.c ft_hooks.c raycast.c get_color.c parsing.c err.c \
 parsing_check.c parsing_color.c parsing_map.c parsing_is_map_valid.c parsing_info.c parsing_door.c parsing_duplist.c parsing_player.c \
-parsing_utils0.c parsing_utils1.c parsing_finish_data.c free_cub.c
+parsing_utils0.c parsing_utils1.c parsing_finish_data.c free_cub.c movement.c movement_utils.c rotate_view.c
 
 SRC_M = $(addprefix $(MAN_FOLDER), $(SRC_COMMON)) 
 SRC_B = $(addprefix $(BON_FOLDER), $(SRC_COMMON))
@@ -44,3 +44,7 @@ re: fclean all
 re_bonus: fclean bonus
 
 .PHONY: all bonus clean fclean re re_bonus ${LIBFT}
+
+
+	# cub->sky_color = 0xF0F0FFFF;
+	# cub->floor_color = 0x404000FF;
