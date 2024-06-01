@@ -4,7 +4,9 @@ LIBFT = ./shared/libft/libft.a
 MAN_FOLDER = ./mandatory/
 BON_FOLDER = ./bonus/
 
-SRC_COMMON = main.c drawing_utils.c init.c render.c ft_math.c terminate.c shapes.c ft_hooks.c raycast.c get_color.c parsing.c err.c
+SRC_COMMON = main.c drawing_utils.c init.c render.c ft_math.c terminate.c shapes.c ft_hooks.c raycast.c get_color.c parsing.c err.c \
+parsing_check.c parsing_color.c parsing_map.c parsing_is_map_valid.c parsing_info.c parsing_door.c parsing_duplist.c parsing_player.c \
+parsing_utils0.c parsing_utils1.c parsing_finish_data.c free_cub.c
 
 SRC_M = $(addprefix $(MAN_FOLDER), $(SRC_COMMON)) 
 SRC_B = $(addprefix $(BON_FOLDER), $(SRC_COMMON))
@@ -12,7 +14,7 @@ SRC_B = $(addprefix $(BON_FOLDER), $(SRC_COMMON))
 OBJ_M = $(SRC_M:.c=.o)
 OBJ_B = $(SRC_B:.c=.o)
 
-CFLAGS = -Wall -Wextra -Werror -ffast-math    -fsanitize=address -g
+CFLAGS = -Wall -Wextra -Werror -ffast-math    #-fsanitize=address -g
 
 all : $(NAME)
 

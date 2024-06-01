@@ -6,7 +6,7 @@
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/30 20:40:16 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/01 02:20:23 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/01 23:05:40 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,7 +166,6 @@ typedef struct s_cub3d
 	char			*gun4_texture_path;
 	char			*gun5_texture_path;
 	char			*door_texture_path;
-	char			*title;
 	int				current_gun_index;
 	int				sky_color;
 	int				floor_color;
@@ -200,5 +199,28 @@ void	fire_mouse_hook(mouse_key_t button, action_t action, modifier_key_t mods,
 			void *param);
 int		parse_map(t_cub3d *cub, int argc, char **argv);
 int		err(char *message);
+int		parse_info_part(t_cub3d *cub, int fd);
+int		parse_map_part(t_cub3d *cub, int fd);
+int		skip_spaces(char **line);
+int		is_space(char c);
+int		check_textures_and_colors(t_cub3d *cub);
+void	put_terminator_at_newline(char *line);
+int		dup_checklist(t_duplication_checklist **list, char *component);
+int		get_image_path(t_cub3d *cub, char **dist ,char *line);
+int		is_door_valid(t_map_row *map_row);
+int		is_player_valid(t_map_row *map_row);
+int		up_valid(t_map_row *up, int at);
+int		down_valid(t_map_row *down, int at);
+int		is_map_valid(t_map_row *map_row);
+char    *skip_empty_lines(int fd);
+int		is_valid_char(char c);
+int		one_or_space(char c);
+void 	solve_colors(t_cub3d* cub, char *line, int i, int *solved);
+int 	fill_door_data(t_cub3d *cub);
+int		find_player(t_cub3d *cub);
+int		determin_scale(t_cub3d *cub);
+void	free_cub(t_cub3d *cub);
+void	free_duplication_checklist(t_duplication_checklist *duplication_checklist);
+
 
 #endif

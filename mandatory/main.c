@@ -123,7 +123,7 @@ void fake_map(t_cub3d *cub)
                 cub->camera.pos.x = x * TILE_SIZE + TILE_SIZE / 2;
                 cub->camera.pos.y = y * TILE_SIZE + TILE_SIZE / 2;
                 cub->camera.dir = degree_to_radian(270);
-                cub->camera.fov = 60;
+              
             }
             else if (cub->map.addr[y][x] == 'V' || cub->map.addr[y][x] == 'H')
             {
@@ -150,23 +150,30 @@ void fake_map(t_cub3d *cub)
     }
 }
 
+int cub_3d(int argc, char **argv)
+{
+    t_cub3d cub;
 
+    ft_bzero(&cub, sizeof(t_cub3d));
+    if(parse_map(&cub, argc, argv) == EXIT_FAILURE)
+    {
+        terminate_cub3d(&cub);
+        return (EXIT_FAILURE);
+    }
+    if (init_cub3d(&cub) == EXIT_FAILURE)
+    {
+        terminate_cub3d(&cub);
+        return (EXIT_FAILURE);
+    }
+    execute_cub3d(&cub);
+    terminate_cub3d(&cub);
+    return (EXIT_SUCCESS);
+}
 
 int		main(int argc, char **argv)
 {
-    (void)argc;
-    (void)argv;
-    t_cub3d cub;
-
-    // [TODO] Parse the map
-    // [TODO] Error handling
-    ft_bzero(&cub, sizeof(t_cub3d));
-    if(parse_map(&cub, argc, argv) == EXIT_FAILURE)
-        return (EXIT_FAILURE);
-    if (init_cub3d(&cub) == EXIT_FAILURE)
-         return (EXIT_FAILURE);
-    //fake_map(&cub);
-    execute_cub3d(&cub);
-    terminate_cub3d(&cub);
-    return (0);
+    int ret;
+    ret = cub_3d(argc, argv);
+    system("leaks cub3D");
+    return (ret);
 }
