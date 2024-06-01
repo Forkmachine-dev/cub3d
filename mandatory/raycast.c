@@ -327,8 +327,8 @@ float ray_cast(t_cub3d *cub, t_map *map, t_cast_request *request)
     cub->cast_result = res;
     // if (cub->display_debug)
     // {
-    //     ft_draw_line(cub, &(t_vec2){cub->camera.pos.x * cub->minimap_scale, cub->camera.pos.y * cub->minimap_scale}, 
-    //         &(t_vec2){res.inter.x * cub->minimap_scale, res.inter.y * cub->minimap_scale}, request->color);
+        ft_draw_line(cub, &(t_vec2){cub->camera.pos.x * cub->minimap_scale, cub->camera.pos.y * cub->minimap_scale}, 
+            &(t_vec2){res.inter.x * cub->minimap_scale, res.inter.y * cub->minimap_scale}, request->color);
     // }
     render_execute(cub, &res);
     return res.dist;

@@ -4,7 +4,7 @@ LIBFT = ./shared/libft/libft.a
 MAN_FOLDER = ./mandatory/
 BON_FOLDER = ./bonus/
 
-SRC_COMMON = main.c drawing_utils.c init.c render.c ft_math.c terminate.c shapes.c ft_hooks.c raycast.c
+SRC_COMMON = main.c drawing_utils.c init.c render.c ft_math.c terminate.c shapes.c ft_hooks.c raycast.c get_color.c parsing.c err.c
 
 SRC_M = $(addprefix $(MAN_FOLDER), $(SRC_COMMON)) 
 SRC_B = $(addprefix $(BON_FOLDER), $(SRC_COMMON))
@@ -12,7 +12,7 @@ SRC_B = $(addprefix $(BON_FOLDER), $(SRC_COMMON))
 OBJ_M = $(SRC_M:.c=.o)
 OBJ_B = $(SRC_B:.c=.o)
 
-CFLAGS = -Wall -Wextra -Werror -ffast-math   # -fsanitize=address -g
+CFLAGS = -Wall -Wextra -Werror -ffast-math    -fsanitize=address -g
 
 all : $(NAME)
 

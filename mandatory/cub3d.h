@@ -1,153 +1,204 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   cub3d.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/05/30 20:40:16 by mel-akhd          #+#    #+#             */
+/*   Updated: 2024/06/01 02:20:23 by mel-akhd         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef CUB3D_H
 # define CUB3D_H
 
-#include "../shared/libft/libft.h"
-#include "../shared/mlx_include/MLX42/MLX42.h"
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
+# include "../shared/libft/libft.h"
+# include "../shared/mlx_include/MLX42/MLX42.h"
+# include <math.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <fcntl.h>
+# include <stdbool.h>
 
-#define WIDTH 1920
-#define HEIGHT 1080
+# define WIDTH 1920
+# define HEIGHT 1080
 
-
-#define TILE_SIZE 64
-#define MAX_DOORS 40
-
-
+# define TILE_SIZE 64
+# define MAX_DOORS 40
 
 typedef struct s_vector
 {
-    float x;
-    float y;
-}               t_vec2;
+	float	x;
+	float	y;
+}t_vec2;
 
 typedef struct s_ivector
 {
-    int x;
-    int y;
-}               t_ivec2;
+	int	x;
+	int	y;
+}t_ivec2;
 
+typedef struct s_map_row
+{
+	char	*row;
+	int		size;
+	struct s_map_row *up_row;
+	struct s_map_row *down_row;
+}t_map_row;
+
+typedef struct s_parsing_checklist
+{
+	bool 	duplicated_components;
+	bool    wrong_texture_ext;
+	bool	floor_color;
+	bool	sky_color;
+	bool    no_texture;
+
+}t_parsing_checklist;
+
+typedef struct s_duplication_checklist
+{
+	char *component;
+	struct s_duplication_checklist *next;
+	
+}t_duplication_checklist;
 typedef struct s_map
 {
-    char **addr;
-    int width;
-    int height;
-}               t_map;
+	char	**addr;
+	int		width;
+	int		height;
+}t_map;
 
 typedef struct s_direction
 {
-    bool up;
-    bool left;
-    bool down;
-    bool right;
-}              t_direction;
+	bool	up;
+	bool	left;
+	bool	down;
+	bool	right;
+}t_direction;
 
 typedef struct s_camera
 {
-    t_vec2  pos;
-    double  dir;
-    int     fov;
-}               t_camera;
+	t_vec2	pos;
+	double	dir;
+	int		fov;
+}t_camera;
 
 typedef struct s_door_info
 {
-    int map_x;
-    int map_y;
-    float close_factor;
-    bool is_vertical;
-    bool is_opening;
-}              t_door_info;
+	int		map_x;
+	int		map_y;
+	float	close_factor;
+	bool	is_vertical;
+	bool	is_opening;
+}t_door_info;
 
 typedef struct s_cast_request
 {
-    double angle;
-    int color;
-    int current_ray;
-    bool is_for_collision;
-}              t_cast_request;
+	double	angle;
+	int		color;
+	int		current_ray;
+	bool	is_for_collision;
+}t_cast_request;
 
 typedef struct s_cast_result
 {
-    double angle;
-    double xo;
-    double yo;
-    int current_ray;
-    bool is_for_collision;
-    bool is_vertical;
-    bool current_ray_is_door;
-    int current_ray_door_index;
-    double dist;
-    t_direction direction; 
-    t_vec2 inter;
+	double		angle;
+	double		xo;
+	double		yo;
+	int			current_ray;
+	bool		is_for_collision;
+	bool		is_vertical;
+	bool		current_ray_is_door;
+	int			current_ray_door_index;
+	double		dist;
+	t_direction	direction; 
+	t_vec2		inter;
 
-}              t_cast_result;
+}t_cast_result;
 
 typedef struct s_wall_render_info
 {
-    double wall_height;
-    double wall_top;
-    double hit_x;
-    double hit_y;
-    float tex_x;
-    float tex_y; 
-    double tex_y_step;
-    mlx_texture_t *texture;
+	double			wall_height;
+	double			wall_top;
+	double			hit_x;
+	double			hit_y;
+	float			tex_x;
+	float			tex_y; 
+	double			tex_y_step;
+	mlx_texture_t	*texture;
 
-}             t_wall_render_info;
+}t_wall_render_info;
 
 typedef struct s_gun_state
 {
-    bool is_firing;
-    double sprite_time;
-}               t_gun_state;
+	bool	is_firing;
+	double	sprite_time;
+}t_gun_state;
 
 typedef struct s_cub3d
 {
-    mlx_t    *mlx;
-    mlx_image_t    *image;
-    char    *title;
-    t_camera camera;
-    t_door_info door_infos[MAX_DOORS];
-    t_map map;
-    double minimap_scale;
-    mlx_texture_t *north_texture;
-    mlx_texture_t *south_texture;
-    mlx_texture_t *west_texture;
-    mlx_texture_t *east_texture;
-    mlx_texture_t *door_texture;
-    mlx_texture_t *gun_textures[6];
-    int current_gun_index;
-    t_cast_result cast_result;
-    int sky_color;
-    int floor_color;
-    bool mouse_locked;
-    double delta_time;
-    double last_time;
-    t_ivec2 mouse_pos;
-    t_gun_state gun_state;
-}               t_cub3d;
+	mlx_t			*mlx;
+	mlx_image_t		*image;
+	mlx_texture_t	*north_texture;
+	mlx_texture_t	*south_texture;
+	mlx_texture_t	*west_texture;
+	mlx_texture_t	*east_texture;
+	mlx_texture_t	*door_texture;
+	mlx_texture_t	*gun_textures[6];
+	t_cast_result	cast_result;
+	t_camera		camera;
+	t_door_info		door_infos[MAX_DOORS];
+	t_map			map;
+	t_ivec2			mouse_pos;
+	t_gun_state		gun_state;
+	t_parsing_checklist	parsing_checklist;
+	t_duplication_checklist	*duplication_checklist;
+	char			*no_texture_path;
+	char			*so_texture_path;
+	char			*we_texture_path;
+	char			*ea_texture_path;
+	char			*gun0_texture_path;
+	char			*gun1_texture_path;
+	char			*gun2_texture_path;
+	char			*gun3_texture_path;
+	char			*gun4_texture_path;
+	char			*gun5_texture_path;
+	char			*door_texture_path;
+	char			*title;
+	int				current_gun_index;
+	int				sky_color;
+	int				floor_color;
+	bool			mouse_locked;
+	double			delta_time;
+	double			last_time;
+	double			minimap_scale;
+}t_cub3d;
 
-int init_cub3d(t_cub3d *cub);
-void ft_init_image(mlx_t* mlx,mlx_image_t *in);
-void ft_pixel_put(mlx_image_t *img, int x, int y, int color);
-void ft_render_image(t_cub3d *cub);
-int is_inside_screen(t_vec2 *vec);
-void ft_draw_line(t_cub3d *instance, const t_vec2 *a, const t_vec2 *b, int color);
-void ft_clear_image(mlx_image_t *image);
-void render_loop_handle (void *param);
-int	ft_max(int a, int b);
-float ft_fmax(float a, float b);
-int	abs(int a);
-int terminate_cub3d(t_cub3d *cub);
-void draw_square(t_cub3d *cub, t_vec2 pos, int size, int color);
-void draw_circle(t_cub3d *cub, t_vec2 pos, int radius, int color);
+int		init_cub3d(t_cub3d *cub);
+void	ft_init_image(mlx_t *mlx, mlx_image_t *in);
+void	ft_pixel_put(mlx_image_t *img, int x, int y, int color);
+void	ft_render_image(t_cub3d *cub);
+int		is_inside_screen(t_vec2 *vec);
+void	ft_draw_line(t_cub3d *instance, const t_vec2 *a, const t_vec2 *b, 
+			int color);
+void	ft_clear_image(mlx_image_t *image);
+void	render_loop_handle(void *param);
+int		ft_max(int a, int b);
+float	ft_fmax(float a, float b);
+int		abs(int a);
+int		terminate_cub3d(t_cub3d *cub);
+void	draw_square(t_cub3d *cub, t_vec2 pos, int size, int color);
+void	draw_circle(t_cub3d *cub, t_vec2 pos, int radius, int color);
 double	degree_to_radian(double angle_degrees);
-void  ft_key_hooks(void *param);
-float ray_cast(t_cub3d *cub, t_map *map, t_cast_request *request);
-int32_t    get_color_texture(mlx_texture_t *txt, int x, int y);
-void key_pess_hook(mlx_key_data_t key, void *param);
-void fire_mouse_hook(mouse_key_t button, action_t action, modifier_key_t mods, void* param);
+void	ft_key_hooks(void *param);
+float	ray_cast(t_cub3d *cub, t_map *map, t_cast_request *request);
+int32_t	get_color_texture(mlx_texture_t *txt, int x, int y);
+void	key_pess_hook(mlx_key_data_t key, void *param);
+void	fire_mouse_hook(mouse_key_t button, action_t action, modifier_key_t mods,
+			void *param);
+int		parse_map(t_cub3d *cub, int argc, char **argv);
+int		err(char *message);
 
 #endif

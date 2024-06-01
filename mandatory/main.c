@@ -160,9 +160,12 @@ int		main(int argc, char **argv)
 
     // [TODO] Parse the map
     // [TODO] Error handling
+    ft_bzero(&cub, sizeof(t_cub3d));
+    if(parse_map(&cub, argc, argv) == EXIT_FAILURE)
+        return (EXIT_FAILURE);
     if (init_cub3d(&cub) == EXIT_FAILURE)
          return (EXIT_FAILURE);
-    fake_map(&cub);
+    //fake_map(&cub);
     execute_cub3d(&cub);
     terminate_cub3d(&cub);
     return (0);

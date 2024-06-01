@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_hooks.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/05/30 20:39:32 by mel-akhd          #+#    #+#             */
+/*   Updated: 2024/05/30 21:50:33 by mel-akhd         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "cub3d.h"
 
 
@@ -24,7 +36,8 @@ void open_door(mlx_key_data_t key, t_cub3d *cub)
     {
         if(cub->cast_result.current_ray_is_door && dist < TILE_SIZE * 2)
         {
-         cub->door_infos[cub->cast_result.current_ray_door_index].is_opening = !cub->door_infos[cub->cast_result.current_ray_door_index].is_opening;
+         cub->door_infos[cub->cast_result.current_ray_door_index].is_opening =
+            !cub->door_infos[cub->cast_result.current_ray_door_index].is_opening;
         }
     }
 }
@@ -55,35 +68,16 @@ void key_pess_hook(mlx_key_data_t key, void *param)
 
     open_door(key, cub);
     look_unlock_mouse(key, cub);
+    if(key.key == MLX_KEY_ESCAPE && key.action == MLX_PRESS)
+        mlx_close_window(cub->mlx);
 }
 
-void  ft_key_hooks(void *param)
+void roatate_view(t_cub3d *cub)
 {
-    t_cub3d *cub = (t_cub3d *)param;
-
-    float move_x = 0;
-    float move_y = 0;
-    float move_speed = 4;
-    float rot_speed = 0.07;
-
-    t_cast_request request;
-    request.angle = cub->camera.dir;
-    request.color = 0x0000FFFF;
-    request.current_ray = 0;
-    request.is_for_collision = true;
-
-    float dist_w = ray_cast(cub, &cub->map, &request);
-    if(cub->cast_result.current_ray_is_door && cub->door_infos[cub->cast_result.current_ray_door_index].close_factor <= 0.21)
-        dist_w = 30; // allow to move through the door
-    request.angle = cub->camera.dir + M_PI;
-    float dist_s = ray_cast(cub, &cub->map, &request);
-    request.angle = cub->camera.dir - M_PI_2;
-    float dist_a = ray_cast(cub, &cub->map, &request);
-    request.angle = cub->camera.dir + M_PI_2;
-    float dist_d = ray_cast(cub, &cub->map, &request);
-
- 
-
+    float rot_speed;
+    
+    rot_speed = 0.07;
+    
     if(mlx_is_key_down(cub->mlx, MLX_KEY_RIGHT))
     {
         cub->camera.dir += rot_speed;
@@ -96,38 +90,6 @@ void  ft_key_hooks(void *param)
         if (cub->camera.dir < 0)
             cub->camera.dir += 2 * M_PI;
     }
-    if(mlx_is_key_down(cub->mlx, MLX_KEY_W) && dist_w > 20)
-    {
-        move_x += cos(cub->camera.dir);
-        move_y += sin(cub->camera.dir) ;
-    }
-    if(mlx_is_key_down(cub->mlx, MLX_KEY_S) && dist_s > 20)
-    {
-        move_x -= cos(cub->camera.dir) ;
-        move_y -= sin(cub->camera.dir) ;
-    }
-    if(mlx_is_key_down(cub->mlx, MLX_KEY_A) && dist_a > 20)
-    {
-        move_x += cos(cub->camera.dir - M_PI_2) ;
-        move_y += sin(cub->camera.dir - M_PI_2) ;
-    }
-    if(mlx_is_key_down(cub->mlx, MLX_KEY_D) && dist_d > 20)
-    {
-        move_x += cos(cub->camera.dir + M_PI_2) ;
-        move_y += sin(cub->camera.dir + M_PI_2) ;
-    }
-
-    if (move_x != 0 && move_y != 0)
-    {
-        float length = sqrt(move_x * move_x + move_y * move_y);
-        move_x /= length;
-        move_y /= length;
-    }
-
-    // Apply the movement
-    cub->camera.pos.x += move_x * move_speed;
-    cub->camera.pos.y += move_y * move_speed;
-
     if(cub->mouse_locked)
     {
         int x, y;
@@ -135,10 +97,98 @@ void  ft_key_hooks(void *param)
         mlx_set_mouse_pos(cub->mlx, cub->mlx->width / 2, cub->mlx->height / 2);
         cub->camera.dir += (cub->mlx->width / 2 - x) * (-0.01 * cub->delta_time);
     }
+}
 
-    if(mlx_is_key_down(cub->mlx, MLX_KEY_ESCAPE))
+void solve_distances(t_cub3d *cub, float *distances)
+{
+    t_cast_request request;
+    float close_factor;
+    
+    request.angle = cub->camera.dir;
+    request.color = 0xFF0000FF;
+    request.is_for_collision = true;
+    distances[0] = ray_cast(cub, &cub->map, &request);
+    close_factor = cub->door_infos[cub->cast_result.current_ray_door_index].close_factor;
+    if(cub->cast_result.current_ray_is_door && close_factor <= 0.21)
+        distances[0] = 30;
+    request.angle = cub->camera.dir + M_PI;
+    distances[1] = ray_cast(cub, &cub->map, &request);
+    close_factor = cub->door_infos[cub->cast_result.current_ray_door_index].close_factor;
+    if(cub->cast_result.current_ray_is_door && close_factor <= 0.21)
+        distances[1] = 30;
+    request.angle = cub->camera.dir - M_PI_2;
+    distances[2] = ray_cast(cub, &cub->map, &request);
+    close_factor = cub->door_infos[cub->cast_result.current_ray_door_index].close_factor;
+    if(cub->cast_result.current_ray_is_door && close_factor <= 0.21)
+        distances[2] = 30;
+    request.angle = cub->camera.dir + M_PI_2;
+    distances[3] = ray_cast(cub, &cub->map, &request);
+    close_factor = cub->door_infos[cub->cast_result.current_ray_door_index].close_factor;
+    if(cub->cast_result.current_ray_is_door && close_factor <= 0.21)
+        distances[3] = 30;
+}
+
+void calculate_movement(t_cub3d *cub, float *distances, t_vec2 *move)
+{
+    move->x = 0;
+    move->y = 0;
+    if(mlx_is_key_down(cub->mlx, MLX_KEY_W) && distances[0] > 20)
     {
-        mlx_close_window(cub->mlx);
+        move->x += cos(cub->camera.dir);
+        move->y += sin(cub->camera.dir);
     }
+    if(mlx_is_key_down(cub->mlx, MLX_KEY_S) && distances[1] > 20)
+    {
+        move->x += cos(cub->camera.dir + M_PI);
+        move->y += sin(cub->camera.dir + M_PI);
+    }
+    if(mlx_is_key_down(cub->mlx, MLX_KEY_A) && distances[2] > 20)
+    {
+        move->x += cos(cub->camera.dir - M_PI_2);
+        move->y += sin(cub->camera.dir - M_PI_2);
+    }
+    if(mlx_is_key_down(cub->mlx, MLX_KEY_D) && distances[3] > 20)
+    {
+        move->x += cos(cub->camera.dir + M_PI_2);
+        move->y += sin(cub->camera.dir + M_PI_2);
+    }
+}
 
+void normalize_movement(t_vec2 *move)
+{
+    float length;
+    
+    if (move->x != 0 && move->y != 0)
+    {
+        length = sqrt(move->x * move->x + move->y * move->y);
+        move->x /= length;
+        move->y /= length;
+    }
+}
+
+void apply_movement(t_cub3d *cub, t_vec2 *move)
+{
+    float move_speed = 4;
+    
+    cub->camera.pos.x += move->x * move_speed;
+    cub->camera.pos.y += move->y * move_speed;
+}
+
+void movement(t_cub3d *cub)
+{
+    float distances[4];
+    t_vec2 move;
+
+    solve_distances(cub, distances);
+    calculate_movement(cub, distances, &move);
+    normalize_movement(&move);
+    apply_movement(cub, &move);
+}
+
+void  ft_key_hooks(void *param)
+{
+    t_cub3d *cub = (t_cub3d *)param;
+
+    roatate_view(cub);
+    movement(cub);
 }
