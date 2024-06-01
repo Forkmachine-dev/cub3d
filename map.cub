@@ -2,7 +2,7 @@
 NO test.png
 SO test2.png
 EA test3.png
-WE testadf   4.png
+WE testadf   4.png // use ft_strtrim
 
 DO door.png
 
