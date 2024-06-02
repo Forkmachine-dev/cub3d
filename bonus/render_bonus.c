@@ -6,7 +6,7 @@
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 01:25:35 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 22:44:16 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/02 21:56:57 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,12 @@ void	render_loop_handle(void *param)
 	t_cub3d	*cub;
 
 	cub = (t_cub3d *)param;
+	update_delta_time(cub);
 	pre_render(cub);
 	render(cub);
+	render_crosshair(cub);
+	update_gun(cub);
+	render_gun(cub, NULL);
+	draw_from_above(cub, cub->map.width, cub->map.height, cub->minimap_scale);
+	draw_player(cub);
 }

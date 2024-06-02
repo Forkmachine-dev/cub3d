@@ -6,7 +6,7 @@
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 00:38:45 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 22:47:26 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/02 01:00:56 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,12 +82,10 @@ bool	is_solid_tile(t_vec2 point, t_map *map, t_cub3d *cub,
 	int	x;
 	int	y;
 
-	(void)cub;
-	(void)res;
 	init_tile_check(&x, &y, &point);
 	if (x <= 0 || y <= 0 || x >= map->width - 1 || y >= map->height - 1)
 		return (true);
 	if (map->addr[y][x] == '1')
 		return (true);
-	return (false);
+	return (handle_door_checking(cub, res, x, y));
 }

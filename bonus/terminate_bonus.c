@@ -1,19 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   err.c                                              :+:      :+:    :+:   */
+/*   terminate.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/01 23:09:52 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 21:03:19 by mel-akhd         ###   ########.fr       */
+/*   Created: 2024/06/02 01:28:34 by mel-akhd          #+#    #+#             */
+/*   Updated: 2024/06/02 01:28:37 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-int	perr(char *message)
+int	terminate_cub3d(t_cub3d *cub)
 {
-	printf("Error\n%s\n", message);
-	return (EXIT_FAILURE);
+	if (cub->mlx)
+		mlx_close_window(cub->mlx);
+	if (cub->image)
+		mlx_delete_image(cub->mlx, cub->image);
+	free_cub(cub);
+	ft_bzero(cub, sizeof(t_cub3d));
+	return (EXIT_SUCCESS);
 }

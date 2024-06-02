@@ -6,7 +6,7 @@
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 21:14:26 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 22:46:07 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/02 21:06:35 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ int	open_window(t_cub3d *cub)
 		return (EXIT_FAILURE);
 	}
 	mlx_key_hook(cub->mlx, key_pess_hook, cub);
+	mlx_mouse_hook(cub->mlx, fire_mouse_hook, cub);
 	mlx_loop_hook(cub->mlx, ft_key_hooks, cub);
 	mlx_loop_hook(cub->mlx, render_loop_handle, cub);
 	return (EXIT_SUCCESS);
@@ -45,6 +46,13 @@ int	load_textures(t_cub3d *cub)
 	cub->south_texture = mlx_load_png(cub->so_texture_path);
 	cub->west_texture = mlx_load_png(cub->we_texture_path);
 	cub->east_texture = mlx_load_png(cub->ea_texture_path);
+	cub->door_texture = mlx_load_png(cub->door_texture_path);
+	cub->gun_textures[0] = mlx_load_png(cub->gun0_texture_path);
+	cub->gun_textures[1] = mlx_load_png(cub->gun1_texture_path);
+	cub->gun_textures[2] = mlx_load_png(cub->gun2_texture_path);
+	cub->gun_textures[3] = mlx_load_png(cub->gun3_texture_path);
+	cub->gun_textures[4] = mlx_load_png(cub->gun4_texture_path);
+	cub->gun_textures[5] = mlx_load_png(cub->gun5_texture_path);
 	cub->current_gun_index = 0;
 	cub->gun_state.is_firing = false;
 	cub->gun_state.sprite_time = 0;
@@ -57,6 +65,20 @@ int	check_textures(t_cub3d *cub)
 	int	i;
 
 	i = 0;
+	while (i < 6)
+	{
+		if (!cub->gun_textures[i])
+		{
+			perr("can't load gun texture");
+			return (EXIT_FAILURE);
+		}
+		i++;
+	}
+	if (!cub->door_texture)
+	{
+		perr("can't load door texture");
+		return (EXIT_FAILURE);
+	}
 	if (!cub->north_texture || !cub->south_texture || !cub->west_texture
 		|| !cub->east_texture)
 	{

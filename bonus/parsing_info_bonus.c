@@ -6,7 +6,7 @@
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 19:05:57 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 22:40:38 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/02 21:59:31 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ int	parse_info_part(t_cub3d *cub, int fd)
 			break ;
 		}
 		free(line);
-		if (solved == 6)
+		if (solved == 13)
 			break ;
 		line = get_next_line(fd);
 	}

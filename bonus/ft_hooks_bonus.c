@@ -6,7 +6,7 @@
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/30 20:39:32 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 22:45:34 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/01 23:21:51 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,8 @@ void	key_pess_hook(mlx_key_data_t key, void *param)
 	t_cub3d	*cub;
 
 	cub = (t_cub3d *)param;
+	open_door(key, cub);
+	look_unlock_mouse(key, cub);
 	if (key.key == MLX_KEY_ESCAPE && key.action == MLX_PRESS)
 		mlx_close_window(cub->mlx);
 }

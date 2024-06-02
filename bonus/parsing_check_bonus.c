@@ -6,7 +6,7 @@
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 19:08:45 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 22:41:12 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/02 21:53:36 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,10 @@ static int	all_textures_good(t_cub3d *cub)
 		return (0);
 	}
 	if (cub->no_texture_path && cub->so_texture_path && cub->we_texture_path
-		&& cub->ea_texture_path)
+		&& cub->ea_texture_path && cub->gun0_texture_path
+		&& cub->gun1_texture_path && cub->gun2_texture_path
+		&& cub->gun3_texture_path && cub->gun4_texture_path
+		&& cub->gun5_texture_path && cub->door_texture_path)
 		return (1);
 	perr("Missing textures");
 	return (0);

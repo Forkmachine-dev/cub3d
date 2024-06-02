@@ -6,7 +6,7 @@
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 18:44:26 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 22:39:25 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/02 19:27:30 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ int	is_space(char c)
 int	is_valid_char(char c)
 {
 	return (c == '1' || c == '0' || c == '2' || c == 'N' || c == 'S' || c == 'W'
-		|| c == 'E' || c == ' ');
+		|| c == 'E' || c == ' ' || c == 'V' || c == 'H');
 }
 
 char	*get_path(char *line, int i)

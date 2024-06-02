@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parsing.c                                          :+:      :+:    :+:   */
+/*   parsing_bonus.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 13:15:12 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 23:08:15 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/02 23:08:50 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,13 @@ void	print_parse_result_debug(t_cub3d *cub)
 	printf("SO: %s\n", cub->so_texture_path);
 	printf("WE: %s\n", cub->we_texture_path);
 	printf("EA: %s\n", cub->ea_texture_path);
+	printf("DO: %s\n", cub->door_texture_path);
+	printf("GU0: %s\n", cub->gun0_texture_path);
+	printf("GU1: %s\n", cub->gun1_texture_path);
+	printf("GU2: %s\n", cub->gun2_texture_path);
+	printf("GU3: %s\n", cub->gun3_texture_path);
+	printf("GU4: %s\n", cub->gun4_texture_path);
+	printf("GU5: %s\n", cub->gun5_texture_path);
 	printf("F: %d, in rpg r: %d, in g: %d, in b: %d\n", cub->floor_color,
 		(cub->floor_color >> 16) & 0xFF, (cub->floor_color >> 8) & 0xFF,
 		cub->floor_color & 0xFF);
@@ -48,10 +55,15 @@ int	check_file_ext(char *file)
 
 int	finish_filling_data(t_cub3d *cub)
 {
+	int	err_scale;
+	int	err_door;
 	int	err_player;
 
+	err_scale = determin_scale(cub);
+	err_door = fill_door_data(cub);
 	err_player = find_player(cub);
-	if (err_player == EXIT_FAILURE)
+	if (err_scale == EXIT_FAILURE || err_door == EXIT_FAILURE
+		|| err_player == EXIT_FAILURE)
 	{
 		return (EXIT_FAILURE);
 	}

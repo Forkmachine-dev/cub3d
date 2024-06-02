@@ -6,7 +6,7 @@
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 18:58:45 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 22:40:04 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/02 21:07:46 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,5 +44,5 @@ int	is_player_valid(t_map_row *map_row)
 	}
 	if (player_count == 0)
 		return (perr("No player found"));
-	return (EXIT_SUCCESS);
+	return (is_door_valid(map_row));
 }
