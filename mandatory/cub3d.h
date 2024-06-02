@@ -6,7 +6,7 @@
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/30 20:40:16 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 01:37:47 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/02 01:47:22 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # define CUB3D_H
 
 # include "../shared/libft/libft.h"
-# include "../shared/mlx_include/MLX42/MLX42.h"
+# include "/Users/mel-akhd/mlx/include/MLX42/MLX42.h"
 # include <fcntl.h>
 # include <math.h>
 # include <stdbool.h>
