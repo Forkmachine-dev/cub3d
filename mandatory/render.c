@@ -6,7 +6,7 @@
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 01:25:35 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 22:44:16 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/02 23:49:12 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ void	draw_bg(t_cub3d *cub)
 
 void	pre_render(t_cub3d *cub)
 {
-	doors_update(cub);
 	draw_bg(cub);
 }
 

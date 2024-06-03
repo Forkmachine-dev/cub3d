@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   render.c                                           :+:      :+:    :+:   */
+/*   render_bonus.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 01:25:35 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 21:56:57 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/02 23:29:00 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,7 @@ void	render_loop_handle(void *param)
 	render_crosshair(cub);
 	update_gun(cub);
 	render_gun(cub, NULL);
-	draw_from_above(cub, cub->map.width, cub->map.height, cub->minimap_scale);
+	//draw_from_above(cub, cub->map.width, cub->map.height, cub->minimap_scale);
+	draw_mini_map(cub);
 	draw_player(cub);
 }

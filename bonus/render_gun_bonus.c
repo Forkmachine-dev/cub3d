@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   render_gun.c                                       :+:      :+:    :+:   */
+/*   render_gun_bonus.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 01:08:10 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 21:47:01 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/03 00:22:02 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void	render_gun(t_cub3d *cub, mlx_texture_t	*gun_texture)
 	int				color;
 
 	gun_texture = cub->gun_textures[cub->current_gun_index];
-	screen_x = WIDTH / 2 - gun_texture->width / 2 + 100;
+	screen_x = WIDTH / 2 - gun_texture->width / 2 + 300;
 	screen_y = HEIGHT - gun_texture->height;
 	tex_y = 0;
 	while (tex_y < gun_texture->height && screen_y + tex_y < HEIGHT)
