@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parsing_check.c                                    :+:      :+:    :+:   */
+/*   parsing_check_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 19:08:45 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 21:53:36 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/04 02:12:45 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,4 +54,16 @@ int	check_textures_and_colors(t_cub3d *cub)
 		return (EXIT_FAILURE);
 	}
 	return (EXIT_SUCCESS);
+}
+
+void	put_terminator_at_last_space(char *line)
+{
+	int	len;
+
+	len = ft_strlen(line);
+	while (len > 0 && is_space(line[len - 1]))
+	{
+		line[len - 1] = '\0';
+		len--;
+	}
 }

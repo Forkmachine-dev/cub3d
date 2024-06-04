@@ -50,7 +50,3 @@ re: fclean all
 re_bonus: fclean bonus
 
 .PHONY: all bonus clean fclean re re_bonus ${LIBFT}
-
-
-	# cub->sky_color = 0xF0F0FFFF;
-	# cub->floor_color = 0x404000FF;

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parsing_color.c                                    :+:      :+:    :+:   */
+/*   parsing_color_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/01 19:01:14 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 19:23:56 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/04 02:13:11 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,11 @@ static int	is_all_digit(char *line)
 	int	i;
 
 	i = 0;
+	if (!line || !line[0])
+		return (0);
 	while (line[i])
 	{
-		if (!ft_isdigit(line[i]) && !is_space(line[i]))
+		if (!ft_isdigit(line[i]))
 			return (0);
 		i++;
 	}
@@ -39,6 +41,30 @@ void	free_values(char **values)
 	free(values);
 }
 
+bool	bad_color_line(char *line)
+{
+	int	i;
+	int	commas;
+
+	i = 0;
+	commas = 0;
+	put_terminator_at_newline(line);
+	put_terminator_at_last_space(line);
+	while (line[i])
+	{
+		if (line[i] == ',')
+			commas++;
+		if (!ft_isdigit(line[i]) && line[i] != ',' && !is_space(line[i]))
+			return (true);
+		if (is_space(line[i]) && line[i + 1] == ',')
+			return (true);
+		i++;
+	}
+	if (commas != 2)
+		return (true);
+	return (false);
+}
+
 static int	parse_color(char *line, int *out_color)
 {
 	int		r;
@@ -46,7 +72,8 @@ static int	parse_color(char *line, int *out_color)
 	int		b;
 	char	**values;
 
-	put_terminator_at_newline(line);
+	if (bad_color_line(line))
+		return (0);
 	while (is_space(*line))
 		line++;
 	values = ft_split(line, ',');
