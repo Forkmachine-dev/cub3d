@@ -26,8 +26,6 @@ all : $(NAME)
 
 bonus : ${NAME_B}
 
-#COMPILE OBJ_M (MANDATORY)
-
 $(NAME) : $(OBJ_M) ${MAN_FOLDER}cub3d.h
 	@make -C ./shared/libft
 	@$(CC) $(CFLAGS) $(OBJ_M) /Users/${USER}/mlx/build/libmlx42.a -Iinclude -lglfw -L"/Users/${USER}/goinfre/homebrew/Cellar/glfw/3.4/lib" ${LIBFT} -o $(NAME)

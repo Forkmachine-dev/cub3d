@@ -6,7 +6,7 @@
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/30 20:40:16 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 23:28:37 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/04 00:59:14 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -240,8 +240,7 @@ void	update_gun(t_cub3d *cub);
 void	render_gun(t_cub3d *cub, mlx_texture_t *gun_texture);
 void	draw_from_above(t_cub3d *cub, int map_width, int map_height,
 			double scale);
-void	draw_player(t_cub3d *cub);
 bool	evaluate_key(t_cub3d *cub, char *line, int i, int *solved);
-void	draw_mini_map(t_cub3d *cub);
+void	draw_mini_map(t_cub3d *cub, float map_range);
 
 #endif

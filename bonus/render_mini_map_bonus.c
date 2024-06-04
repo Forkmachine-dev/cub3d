@@ -6,65 +6,60 @@
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 01:11:14 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/03 01:50:01 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/03 18:42:14 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-
-void draw_mini_map(t_cub3d *cub)
+void	draw_player(t_cub3d *cub, float half_minimap_size)
 {
-    int x_screen;
-    int y_screen;
-    int x_map;
-    int y_map;
-    float map_startx;
-    float map_starty;
-    
-    y_screen = 0;
-    
-    float half_minimap_size = 100; // Half of the minimap size (200/2)
-    float map_range = 10 * TILE_SIZE; // Range of tiles to display on one side
-    
-    map_starty = cub->camera.pos.y - map_range;
-    float map_step = (TILE_SIZE * 20) / 200.0;
-    
-    while (y_screen < 200)
-    {
-        x_screen = 0;
-        map_startx = cub->camera.pos.x - map_range;
-        while (x_screen < 200)
-        {
-            ft_pixel_put(cub->image, x_screen, y_screen, 0x00000080);
-            x_map = (int)(map_startx / TILE_SIZE);
-            y_map = (int)(map_starty / TILE_SIZE);
-            
-            if (x_map >= 0 && x_map < cub->map.width && y_map >= 0 && y_map < cub->map.height)
-            {
-                if (cub->map.addr[y_map][x_map] == '1')
-                    ft_pixel_put(cub->image, x_screen, y_screen, 0xFFFFFF80);
-                else if (cub->map.addr[y_map][x_map] == 'V' || cub->map.addr[y_map][x_map] == 'H')
-                    ft_pixel_put(cub->image, x_screen, y_screen, 0x0000FF80);                
-            }
-            map_startx += map_step;
-            x_screen++;
-        }
-        map_starty += map_step;
-        y_screen++;
-    }
-    // Render player at the center
-    ft_pixel_put(cub->image, half_minimap_size, half_minimap_size, 0xFF000080);
+	draw_circle(cub, (t_vec2){half_minimap_size, half_minimap_size}, 4,
+		0xFF000080);
+	ft_draw_line(cub, &(t_vec2){half_minimap_size, half_minimap_size},
+		&(t_vec2){half_minimap_size + cos(cub->camera.dir) * 10,
+		half_minimap_size + sin(cub->camera.dir) * 10}, 0xFF000080);
 }
 
-void	draw_player(t_cub3d *cub)
+void	draw_tile(t_cub3d *cub, t_vec2 map_start, t_vec2 xy_screen)
 {
-	// double	scale;
+	t_ivec2	xy_map;
 
-	// scale = cub->minimap_scale;
-	// draw_circle(cub, (t_vec2){100 , 100}, 4, 0xFF000080);
-	// ft_draw_line(cub, &(t_vec2){100, 100}, &(t_vec2){100 + cos(cub->camera.dir)
-	// 	* 10, 100 + sin(cub->camera.dir) * 10},
-	// 	0xFF000080);
-	(void)cub;
+	ft_pixel_put(cub->image, xy_screen.x, xy_screen.y, 0x00000080);
+	xy_map.x = (int)(map_start.x / TILE_SIZE);
+	xy_map.y = (int)(map_start.y / TILE_SIZE);
+	if (xy_map.x >= 0 && xy_map.x < cub->map.width && xy_map.y >= 0
+		&& xy_map.y < cub->map.height)
+	{
+		if (cub->map.addr[xy_map.y][xy_map.x] == '1')
+			ft_pixel_put(cub->image, xy_screen.x, xy_screen.y, 0xFFFFFF80);
+		else if (cub->map.addr[xy_map.y][xy_map.x] == 'V'
+				|| cub->map.addr[xy_map.y][xy_map.x] == 'H')
+			ft_pixel_put(cub->image, xy_screen.x, xy_screen.y, 0x0000FF80);
+	}
+}
+
+void	draw_mini_map(t_cub3d *cub, float map_range)
+{
+	t_vec2	xy_screen;
+	t_vec2	map_start;
+	float	map_step;
+
+	xy_screen.y = 0;
+	map_start.y = cub->camera.pos.y - map_range;
+	map_step = (TILE_SIZE * 20) / 200.0;
+	while (xy_screen.y < 200)
+	{
+		xy_screen.x = 0;
+		map_start.x = cub->camera.pos.x - map_range;
+		while (xy_screen.x < 200)
+		{
+			draw_tile(cub, map_start, xy_screen);
+			map_start.x += map_step;
+			xy_screen.x++;
+		}
+		map_start.y += map_step;
+		xy_screen.y++;
+	}
+	draw_player(cub, 100.0);
 }
