@@ -6,7 +6,7 @@
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 00:45:03 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/02 01:06:26 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/04 19:42:13 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,39 +15,33 @@
 void	solve_v_texture(t_cub3d *cub, t_cast_result *res,
 		t_wall_render_info *wr)
 {
-	float	x_factor;
+	float	normalizer;
 
-	x_factor = wr->hit_y - ((int)(wr->hit_y / TILE_SIZE) * TILE_SIZE);
+	normalizer = wr->hit_y - (int)(wr->hit_y / TILE_SIZE) * TILE_SIZE;
 	if (cos(res->angle) >= 0)
-	{
 		wr->texture = cub->east_texture;
-		wr->tex_x = (cub->east_texture->width * x_factor) / TILE_SIZE;
-	}
 	else
 	{
-		x_factor = (cub->west_texture->width * x_factor) / TILE_SIZE;
-		wr->tex_x = cub->west_texture->width - x_factor;
 		wr->texture = cub->west_texture;
+		normalizer = TILE_SIZE - normalizer;
 	}
+	wr->tex_x = normalizer * wr->texture->width / TILE_SIZE;
 }
 
 void	solve_h_texture(t_cub3d *cub, t_cast_result *res,
 		t_wall_render_info *wr)
 {
-	float	x_factor;
+	float	normlizer;
 
-	x_factor = wr->hit_x - ((int)(wr->hit_x / TILE_SIZE) * TILE_SIZE);
+	normlizer = wr->hit_x - (int)(wr->hit_x / TILE_SIZE) * TILE_SIZE;
 	if (sin(res->angle) < 0)
-	{
 		wr->texture = cub->north_texture;
-		wr->tex_x = (cub->north_texture->width * x_factor) / TILE_SIZE;
-	}
 	else
 	{
-		x_factor = (cub->south_texture->width * x_factor) / TILE_SIZE;
-		wr->tex_x = cub->south_texture->width - x_factor;
+		normlizer = TILE_SIZE - normlizer;
 		wr->texture = cub->south_texture;
 	}
+	wr->tex_x = normlizer * wr->texture->width / TILE_SIZE;
 }
 
 void	build_wall_render_info(t_cub3d *cub, t_cast_result *res,

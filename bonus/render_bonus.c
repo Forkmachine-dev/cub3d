@@ -6,7 +6,7 @@
 /*   By: mel-akhd <mel-akhd@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/02 01:25:35 by mel-akhd          #+#    #+#             */
-/*   Updated: 2024/06/03 18:36:21 by mel-akhd         ###   ########.fr       */
+/*   Updated: 2024/06/04 19:38:10 by mel-akhd         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,25 +52,19 @@ void	render_crosshair(t_cub3d *cub)
 	int	y;
 
 	x = WIDTH / 2 - 7;
+	y = HEIGHT / 2;
 	while (x < WIDTH / 2 + 7)
 	{
-		y = HEIGHT / 2 - 1;
-		while (y < HEIGHT / 2 + 1)
-		{
+		if (x < (WIDTH / 2) - 2 || x > (WIDTH / 2) + 2)
 			ft_pixel_put(cub->image, x, y, 0xFFFFFFFF);
-			y++;
-		}
 		x++;
 	}
 	y = HEIGHT / 2 - 7;
-	while (y < HEIGHT / 2 + 7)
+	x = WIDTH / 2;
+	while (y < (HEIGHT / 2) + 7)
 	{
-		x = WIDTH / 2 - 1;
-		while (x < WIDTH / 2 + 1)
-		{
+		if (y < (HEIGHT / 2) - 2 || y > HEIGHT / 2 + 2)
 			ft_pixel_put(cub->image, x, y, 0xFFFFFFFF);
-			x++;
-		}
 		y++;
 	}
 }
