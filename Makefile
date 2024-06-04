@@ -35,6 +35,7 @@ $(NAME) : $(OBJ_M) ${MAN_FOLDER}cub3d.h
 $(NAME_B) : $(OBJ_B)  ${BON_FOLDER}cub3d.h
 	@make -C ./shared/libft
 	@$(CC) $(CFLAGS) $(OBJ_B) /Users/${USER}/mlx/build/libmlx42.a -Iinclude -lglfw -L"/Users/${USER}/goinfre/homebrew/Cellar/glfw/3.4/lib" ${LIBFT} -o $(NAME_B)
+	@echo "-----Done Building cub3D [bonus]!-----"
 
 
 clean:
